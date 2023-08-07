@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+dist/
+vendor/
+logs/
+.sass-cache/
+*.exe
+*.exe~
+*.log
+*.sum
+*.http
+*.dat
+*.db
+.DS_Store
+publish.sh
