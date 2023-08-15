@@ -69,13 +69,15 @@ func (m *WebSite) Add() error {
 }
 
 // List 分页获取
-func (m *WebSite) List(pg, size int) ([]*WebSite, error) {
+func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
 	DB.Open()
 	defer func() {
 		_ = DB.Conn.Close()
 	}()
+	count := 0
 	start := (pg - 1) * size
 	end := pg * size
+	log.Error("start,end = ", start, end)
 	data := make([]*WebSite, 0)
 	err := DB.Conn.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(WebSiteTable))
@@ -86,7 +88,7 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, error) {
 		i := 0
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			i++
-			if i > start || i < end {
+			if i > start && i <= end {
 				fmt.Printf("key=%s, value=%s\n", k, v)
 				value := &WebSite{}
 				e := json.Unmarshal(v, value)
@@ -95,10 +97,11 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, error) {
 				}
 				data = append(data, value)
 			}
+			count = i
 		}
 		return nil
 	})
-	return data, err
+	return data, count, err
 }
 
 // Get 指定获取
@@ -116,4 +119,29 @@ func (m *WebSite) Update(k string) error {
 // Delete 删除数据
 func (m *WebSite) Delete(k string) error {
 	return DB.Delete(WebSiteTable, k)
+}
+
+func (m *WebSite) GetAll() ([]*WebSite, error) {
+	DB.Open()
+	defer func() {
+		_ = DB.Conn.Close()
+	}()
+	data := make([]*WebSite, 0)
+	err := DB.Conn.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(WebSiteTable))
+		if b == nil {
+			return fmt.Errorf(WebSiteTable + "表不存在")
+		}
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			value := &WebSite{}
+			e := json.Unmarshal(v, value)
+			if e != nil {
+				log.Error("数据解析错误")
+			}
+			data = append(data, value)
+		}
+		return nil
+	})
+	return data, err
 }

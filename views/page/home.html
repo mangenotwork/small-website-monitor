@@ -165,106 +165,42 @@
                     <tr>
                         <th scope="col">站点</th>
                         <th scope="col">报警</th>
+                        <th scope="col">监测方式</th>
+                        <th scope="col">生命URI</th>
                         <th scope="col">响应</th>
                         <th scope="col">对照组</th>
                         <th scope="col">操作</th>
                     </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th>www.33633.cn</th>
-                            <td><span class="badge text-bg-danger">11</span></td>
-                            <td>33ms</td>
-                            <td>12ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
-                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setUriModal">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>12ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>12ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>12ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
 
-                            </td>
-                        </tr>
-
+                        <template v-for="item in websiteList.data.List">
+                            <tr>
+                                <td><span style="font-size: 14px;"><b>{{ item.Host }}</b></span></td>
+                                <td><span class="badge text-bg-danger">11</span></td>
+                                <td><span style="font-size: 10px;">生命URI+站点随机URI+监测点/{{ item.Rate }}s</span></td>
+                                <td><span style="font-size: 10px;">{{ item.HealthUri }}</span></td>
+                                <td>33ms</td>
+                                <td>12ms</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
+                                        <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setUriModal">
+                                        <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm">
+                                        <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm">
+                                        <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm">
+                                        <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
 
                     </tbody>
 
@@ -272,11 +208,10 @@
 
                 <div class="text-center">
                     <div class="btn-group me-2" role="group" aria-label="Second group" >
-                        <button type="button" class="btn btn-secondary">1</button>
-                        <button type="button" class="btn btn-light">2</button>
-                        <button type="button" class="btn btn-light">3</button>
-                        <button type="button" class="btn btn-light">4</button>
-                        <button type="button" class="btn btn-light">5</button>
+                        <template v-for="item in websiteList.data.PageList">
+                            <button v-if="item.Action === true" type="button" class="btn btn-secondary" @click="gotoList(item.Number)">{{ item.Number }}</button>
+                            <button v-else type="button" class="btn btn-secondary" @click="gotoList(item.Number)">{{ item.Number }}</button>
+                        </template>
                     </div>
                 </div>
 
@@ -505,6 +440,7 @@
                 msg: "",
                 websiteList: {
                     api: "/api/website/list",
+                    page: 1,
                     data: [],
                 },
                 hasMail: {
@@ -529,6 +465,12 @@
                 }
             }
         },
+        created:function(){
+            var t = this;
+            t.getList();
+            t.getMail();
+            t.getMailInfo();
+        },
         methods: {
            addWebSiteMonitor: function () {
                var t = this;
@@ -539,6 +481,10 @@
                    dataType: 'json',
                    success: function(data){
                        console.log(data)
+                       if (data.code === 0) {
+                           $("#addHostModal").modal('toggle');
+                           t.getList();
+                       }
                        t.msg = data.msg;
                        const toastLiveExample = document.getElementById('liveToast')
                        const toast = new bootstrap.Toast(toastLiveExample)
@@ -558,7 +504,7 @@
                 var t = this;
                 $.ajax({
                     type: "get",
-                    url: t.websiteList.api,
+                    url: t.websiteList.api+"?pg"+t.websiteList.page,
                     data: "",
                     dataType: 'json',
                     success: function(data){
@@ -569,6 +515,12 @@
                         console.log(xhr, textStatus);
                     }
                 });
+            },
+
+            gotoList: function (pg) {
+                var t = this;
+                t.websiteList.page = pg;
+                t.getList();
             },
 
             getMail: function () {
@@ -653,12 +605,6 @@
                 });
             },
 
-        },
-        created:function(){
-            var t = this;
-            t.getList();
-            t.getMail();
-            t.getMailInfo();
         },
         computed: {
         },

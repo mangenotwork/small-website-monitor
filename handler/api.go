@@ -100,6 +100,10 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 		c.APIOutPutError(err, "保存数据失败")
 		return
 	}
+
+	// 更新站点对象
+	business.Push()
+
 	c.APIOutPut("", "添加成功")
 	return
 }
@@ -108,16 +112,34 @@ func CaseT(c *ginHelper.GinCtx) {
 	c.APIOutPut("test", "")
 }
 
+type WebsiteListOut struct {
+	List     []*model.WebSite
+	Count    int
+	PageList []*ginHelper.Page
+}
+
 func WebsiteList(c *ginHelper.GinCtx) {
+
+	pg := c.GetQueryInt("pg")
+	if pg < 1 {
+		pg = 1
+	}
+	log.Info("pg = ", pg)
+	size := 10
 
 	// TODO 聚合查询，需要将最近响应时间取出来聚合
 
-	data, err := new(model.WebSite).List(1, 10)
+	data, count, err := new(model.WebSite).List(pg, size)
 	if err != nil {
 		c.APIOutPutError(err, "获取失败")
 		return
 	}
-	c.APIOutPut(data, "")
+
+	c.APIOutPut(&WebsiteListOut{
+		List:     data,
+		Count:    count,
+		PageList: c.PageList(pg, 5, count, size, ""),
+	}, "")
 	return
 }
 
