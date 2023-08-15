@@ -20,9 +20,8 @@ small website monitor ( 小型站点监测平台 )
 
 # v1 基础架构
 整体结构MVC
-后端: gin + mysql
+后端: gin 
 UI: Bootstrap v5
-
 
 # V2 基础架构
 整体架构CS

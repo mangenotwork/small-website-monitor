@@ -76,9 +76,11 @@
 </head>
 <body>
 
+<div id="app">
+
 <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#">
-        <img src="/static/bootstrap/img/stripe.svg" alt="Bootstrap" width="28" height="28" style="background-color: #FFFFFF;"> WebSite Monitor
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" @click="test()">
+        <img src="/static/bootstrap/img/stripe.svg" alt="Bootstrap" width="28" height="28" style="background-color: #FFFFFF;"> WebSite Monitor {{ title }}
     </a>
     <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -99,20 +101,15 @@
                     <a class="nav-link active" aria-current="page" data-bs-toggle="modal" data-bs-target="#mailSetModal" >邮件设置</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" data-bs-toggle="modal" data-bs-target="#testMailModal" >测试邮件发送</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link active" aria-current="page" data-bs-toggle="modal" data-bs-target="#confModal" >查看配置</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/">退出登录</a>
+                    <a class="nav-link" href="/out">退出登录</a>
                 </li>
             </ul>
 
         </div>
     </div>
-    </div>
-
 </header>
 
 <div class="container-fluid">
@@ -121,13 +118,19 @@
             <div class="position-sticky pt-3 sidebar-sticky">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">
+                        <a class="nav-link active" @click="test">
                             <span data-feather="home" class="align-text-bottom"></span>
                             主页
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" @click="test()">
+                            <span data-feather="users" class="align-text-bottom"></span>
+                            监测客户端
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" @click="test()">
                             <span data-feather="users" class="align-text-bottom"></span>
                             工具
                         </a>
@@ -141,6 +144,12 @@
         </nav>
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
+            <template v-if="hasMail.data===false">
+                <div class="alert alert-danger" role="alert">
+                    <a aria-current="page" data-bs-toggle="modal" data-bs-target="#mailSetModal">还未设置邮件通知! 请点击 <span style="text-decoration:underline;">邮件设置</span> 进行设置</a>
+                </div>
+            </template>
 
             <div class="">
                 <div class="btn-group" role="group" aria-label="Basic example">
@@ -157,6 +166,7 @@
                         <th scope="col">站点</th>
                         <th scope="col">报警</th>
                         <th scope="col">响应</th>
+                        <th scope="col">对照组</th>
                         <th scope="col">操作</th>
                     </tr>
                     </thead>
@@ -165,9 +175,10 @@
                             <th>www.33633.cn</th>
                             <td><span class="badge text-bg-danger">11</span></td>
                             <td>33ms</td>
+                            <td>12ms</td>
                             <td>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
+                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setUriModal">
                                     <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
@@ -176,23 +187,7 @@
                                     <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
+                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
@@ -203,15 +198,19 @@
                             <th>m.33633.cn</th>
                             <td><span class="badge text-bg-success">Success</span></td>
                             <td>63ms</td>
+                            <td>12ms</td>
                             <td>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
+                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
@@ -222,15 +221,19 @@
                             <th>m.33633.cn</th>
                             <td><span class="badge text-bg-success">Success</span></td>
                             <td>63ms</td>
+                            <td>12ms</td>
                             <td>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
+                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm">
+                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
@@ -241,9 +244,10 @@
                             <th>m.33633.cn</th>
                             <td><span class="badge text-bg-success">Success</span></td>
                             <td>63ms</td>
+                            <td>12ms</td>
                             <td>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
+                                    <img src="/static/bootstrap/img/gear-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;"></span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
@@ -252,103 +256,12 @@
                                     <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
+                                    <img src="/static/bootstrap/img/graph-up.svg" alt="Bootstrap" width="18" height="18">
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm">
                                     <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
                                 </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>www.33633.cn</th>
-                            <td><span class="badge text-bg-danger">11</span></td>
-                            <td>33ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>www.33633.cn</th>
-                            <td><span class="badge text-bg-danger">11</span></td>
-                            <td>33ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>m.33633.cn</th>
-                            <td><span class="badge text-bg-success">Success</span></td>
-                            <td>63ms</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/ui-radios.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">设置报警</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/broadcast.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">监测点</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/file-text-fill.svg" alt="Bootstrap" width="18" height="18"> <span style="font-size: 12px;">日志</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm">
-                                    <img src="/static/bootstrap/img/trash-fill.svg" alt="Bootstrap" width="18" height="18">
-                                </button>
+
                             </td>
                         </tr>
 
@@ -367,24 +280,76 @@
                     </div>
                 </div>
 
-
             </div>
 
-
-            <!-- 添加站点监测 -->
-            <div class="modal fade" id="addHostModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addHostModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
+            <!-- 添加站点监测 modal fade modal-lg   -->
+            <div class="modal fade" id="addHostModal"  tabindex="-1" aria-labelledby="addHostModalLabel" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
                     <div class="modal-content">
+
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="addHostModalLabel">添加站点监测</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            ...
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">站点 <span style="color: red;">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.host" class="form-control" >
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">生命监测uri <span style="color: red;">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.healthUri" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">监测频率 <span style="color: red;">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.rate" class="form-control">
+                                </div>
+                                <div class="form-text">单位秒</div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">设置监测响应 <span style="color: red;">*</span></label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.alarmResTime" class="form-control" >
+                                </div>
+                                <div class="form-text">请求响应超过这个时间会报警，单位ms</div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">探寻站点深度</label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.uriDepth" class="form-control" >
+                                </div>
+                                <div class="form-text">用于抓取站点的URI</div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">探寻更新频率</label>
+                                <div class="col-sm-8">
+                                    <input type="text" v-model="addWebSite.param.uriUpdateRate" class="form-control">
+                                </div>
+                                <div class="form-text">单位小时</div>
+                            </div>
+
+                            <div class="mb-3 row">
+                                <label class="col-sm-2 col-form-label">更多监测URI(多个";"隔开)</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control" v-model="addWebSite.param.moreUri" aria-label="多个分号(;)隔开" rows="5"></textarea>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary">提交</button>
+                            <a type="button" class="btn btn-primary" @click="addWebSiteMonitor()">提交</a>
                         </div>
                     </div>
                 </div>
@@ -438,30 +403,31 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            ...
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" v-model="mailConf.param.host" placeholder="smtp.qq.com">
+                                <label>邮件服务器(例子:smtp.qq.com)</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" v-model="mailConf.param.port" placeholder="25">
+                                <label>Port(例子:465/587/25)</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" v-model="mailConf.param.from" placeholder="">
+                                <label>From(发送人)</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" v-model="mailConf.param.authCode" placeholder="">
+                                <label>AuthCode(授权码)</label>
+                            </div>
+                            <div class="form-floating">
+                                <textarea class="form-control" v-model="mailConf.param.toList" style="height: 98px;"></textarea>
+                                <label>通知收件人，多个分号";"隔开</label>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary">提交</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 测试邮件发送 -->
-            <div class="modal fade" id="testMailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="testMailModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="testMailModalLabel">测试邮件发送</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            ...
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary">提交</button>
+                            <button type="button" class="btn btn-primary" @click="mailSendTest()">测试发送邮件</button>
+                            <button type="button" class="btn btn-primary" @click="setMailConf()">保存提交</button>
                         </div>
                     </div>
                 </div>
@@ -486,11 +452,221 @@
                 </div>
             </div>
 
+
+            <div class="toast-container p-3 top-50 start-50 translate-middle">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <img src="/static/bootstrap/img/stripe.svg" class="rounded me-2" >
+                        <strong class="me-auto">提示</strong>
+                        <small></small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{msg}}
+                    </div>
+                </div>
+            </div>
+
+
         </main>
     </div>
 </div>
 
+
+</div>
 </body>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 <script src="/static/bootstrap/js/bootstrap.bundle.min.js?v=1"></script>
-</script><script src="/static/bootstrap/js/dashboard.js"></script>
+<script src="/static/bootstrap/js/dashboard.js"></script>
+<script src="/static/vue3/vue.global.js"></script>
+
+
+<script>
+
+    // vue
+    const { createApp, ref } = Vue;
+
+    const app = createApp({
+        data() {
+            return {
+                title: "",
+                addWebSite: {
+                    api: "/api/website/add",
+                    param : {
+                        host: "",
+                        healthUri: "",
+                        rate: 10,
+                        alarmResTime: 1000,
+                        uriDepth: 2,
+                        uriUpdateRate: 24,
+                        moreUri: "",
+                    }
+                },
+                msg: "",
+                websiteList: {
+                    api: "/api/website/list",
+                    data: [],
+                },
+                hasMail: {
+                    api: "/api/mail/init",
+                    data: {},
+                },
+                mailConf: {
+                    api: "/api/mail/conf",
+                    param: {
+                        host: "smtp.qq.com",
+                        port: 25,
+                        from: "",
+                        authCode: "",
+                        toList: "",
+                    },
+                },
+                mailInfo: {
+                    api: "/api/mail/info",
+                },
+                mailSend: {
+                    api: "/api/mail/sendTest",
+                }
+            }
+        },
+        methods: {
+           addWebSiteMonitor: function () {
+               var t = this;
+               $.ajax({
+                   type: "post",
+                   url: t.addWebSite.api,
+                   data: JSON.stringify(t.addWebSite.param),
+                   dataType: 'json',
+                   success: function(data){
+                       console.log(data)
+                       t.msg = data.msg;
+                       const toastLiveExample = document.getElementById('liveToast')
+                       const toast = new bootstrap.Toast(toastLiveExample)
+                       toast.show()
+                   },
+                   error: function(xhr,textStatus) {
+                       console.log(xhr, textStatus);
+                   }
+               });
+           },
+
+            test:function () {
+                console.log("test...")
+            },
+
+            getList: function () {
+                var t = this;
+                $.ajax({
+                    type: "get",
+                    url: t.websiteList.api,
+                    data: "",
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data)
+                       t.websiteList.data = data.data;
+                    },
+                    error: function(xhr,textStatus) {
+                        console.log(xhr, textStatus);
+                    }
+                });
+            },
+
+            getMail: function () {
+                var t = this;
+                $.ajax({
+                    type: "get",
+                    url: t.hasMail.api,
+                    data: "",
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data)
+                        t.hasMail.data = data.data;
+                    },
+                    error: function(xhr,textStatus) {
+                        console.log(xhr, textStatus);
+                    }
+                });
+            },
+
+            setMailConf: function () {
+                var t = this;
+                $.ajax({
+                    type: "post",
+                    url: t.mailConf.api,
+                    data: JSON.stringify(t.mailConf.param),
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data)
+                        if (data.code === 0) {
+                            $("#mailSetModal").modal('toggle');
+                            t.getMail();
+                        }
+                        t.msg = data.msg;
+                        const toastLiveExample = document.getElementById('liveToast')
+                        const toast = new bootstrap.Toast(toastLiveExample)
+                        toast.show()
+                    },
+                    error: function(xhr,textStatus) {
+                        console.log(xhr, textStatus);
+                    }
+                });
+            },
+
+            getMailInfo: function () {
+                var t = this;
+                $.ajax({
+                    type: "get",
+                    url: t.mailInfo.api,
+                    data: "",
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data)
+                        t.mailConf.param.host = data.data.Host;
+                        t.mailConf.param.port = data.data.Port;
+                        t.mailConf.param.from = data.data.From;
+                        t.mailConf.param.authCode = data.data.AuthCode;
+                        t.mailConf.param.toList = data.data.ToList;
+                    },
+                    error: function(xhr,textStatus) {
+                        console.log(xhr, textStatus);
+                    }
+                });
+            },
+
+            mailSendTest: function () {
+                var t = this;
+                $.ajax({
+                    type: "get",
+                    url: t.mailSend.api,
+                    data: "",
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data)
+                        t.msg = data.msg;
+                        const toastLiveExample = document.getElementById('liveToast')
+                        const toast = new bootstrap.Toast(toastLiveExample)
+                        toast.show()
+                    },
+                    error: function(xhr,textStatus) {
+                        console.log(xhr, textStatus);
+                    }
+                });
+            },
+
+        },
+        created:function(){
+            var t = this;
+            t.getList();
+            t.getMail();
+            t.getMailInfo();
+        },
+        computed: {
+        },
+        mounted:function(){
+        },
+    });
+
+    app.mount('#app');
+</script>
+
 </html>

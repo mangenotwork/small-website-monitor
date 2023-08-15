@@ -3,19 +3,18 @@ app:
   name: "small-website-monitor"  # 项目名称
   runType: "dev"  # 运行模式
 
-# http 服务
+# http服务
 httpServer:
   open: true
   prod: 18888 # 端口
 
-mysql:
+# user
+user:
   -
-    dbname: "small_website_monitor"
-    user: "root"
-    password: "admin"
-    host: "192.168.3.2"
-    port: "3306"
+    name: "admin"
+    password: "123"
 
+# jwt设置
 jwt:
-  secret: "asdasd786251ashdgjdbd"
+  secret: "small-website-monitor20230808"
   expire: 86400
