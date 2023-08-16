@@ -41,6 +41,9 @@ func Page() {
 	pg := Router.Group("")
 	pg.Use(AuthPG())
 	pg.GET("/home", handler.HomePage)
+	// TODO 监测器
+	// TODO 工具
+	// TODO 使用说明
 }
 
 func API() {
@@ -48,11 +51,22 @@ func API() {
 	api.GET("/out", handler.Out)
 	api.GET("/test", ginHelper.Handle(handler.CaseT))
 	api.POST("/website/add", ginHelper.Handle(handler.WebsiteAdd))
-	api.GET("/website/list", ginHelper.Handle(handler.WebsiteList))   // TODO
-	api.GET("/mail/init", ginHelper.Handle(handler.MailInit))         // 是否设置邮件
-	api.POST("/mail/conf", ginHelper.Handle(handler.MailConf))        // 设置邮件配置
-	api.GET("/mail/info", ginHelper.Handle(handler.MailInfo))         // 获取邮件配置信息
-	api.GET("/mail/sendTest", ginHelper.Handle(handler.MailSendTest)) // 测试发生邮件
+	api.GET("/website/list", ginHelper.Handle(handler.WebsiteList))            // TODO
+	api.GET("/mail/init", ginHelper.Handle(handler.MailInit))                  // 是否设置邮件
+	api.POST("/mail/conf", ginHelper.Handle(handler.MailConf))                 // 设置邮件配置
+	api.GET("/mail/info", ginHelper.Handle(handler.MailInfo))                  // 获取邮件配置信息
+	api.GET("/mail/sendTest", ginHelper.Handle(handler.MailSendTest))          // 测试发生邮件
+	api.POST("/point/add/:hostId", ginHelper.Handle(handler.WebsitePointAdd))  // 添加监测点
+	api.GET("/point/list/:hostId", ginHelper.Handle(handler.WebsitePointList)) // 获取监测点
+	api.POST("/point/del/:hostId", ginHelper.Handle(handler.WebsitePointDel))  // 删除监测点
+	// TODO 查看日志
+	// TODO 设置
+	// TODO 删除
+	// TODO 图表
+
+	// 测试
+	api.GET("/test/case1", ginHelper.Handle(handler.Case1))
+
 }
 
 // AuthPG 权限验证中间件

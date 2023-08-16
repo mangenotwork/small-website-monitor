@@ -52,7 +52,6 @@ type WebsiteAddParam struct {
 	UriDepth       int64  `json:"uriDepth"`
 	UriUpdateRate  int64  `json:"uriUpdateRate"`
 	AlarmStateCode string `json:"alarmStateCode"`
-	MoreUri        string `json:"moreUri"`
 }
 
 func WebsiteAdd(c *ginHelper.GinCtx) {
@@ -95,7 +94,7 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 		Created:       time.Now().Unix(),
 	}
 	log.Info(website)
-	err = website.Add()
+	websiteId, err := website.Add()
 	if err != nil {
 		c.APIOutPutError(err, "保存数据失败")
 		return
@@ -103,6 +102,9 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 
 	// 更新站点对象
 	business.Push()
+	// 采集站点URI相关信息
+	webSiteUri := model.NewWebSiteUri(websiteId)
+	webSiteUri.Collect(website.HealthUri, int(website.UriDepth))
 
 	c.APIOutPut("", "添加成功")
 	return
@@ -223,4 +225,93 @@ func MailSendTest(c *ginHelper.GinCtx) {
 	model.Send(title, body)
 	c.APIOutPut("", "测试邮件已发送请注意查收!")
 	return
+}
+
+type WebsitePointParam struct {
+	Uri string `json:"uri"`
+}
+
+func WebsitePointAdd(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	log.Info("hostId = ", hostId)
+	param := &WebsitePointParam{}
+	err := c.GetPostArgs(param)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	ctx, _ := gt.Get(param.Uri)
+	if business.AlertRuleCode(ctx.StateCode) {
+		c.APIOutPutError(nil, fmt.Sprintf("%s请求失败，状态码:%d", param.Uri, ctx.StateCode))
+		return
+	}
+	websitePoint := model.NewWebSitePoint(hostId)
+	err = websitePoint.Add(param.Uri)
+	if err != nil {
+		c.APIOutPutError(err, "添加监测点失败:"+err.Error())
+		return
+	}
+	c.APIOutPut("", "添加成功")
+	return
+}
+
+func WebsitePointList(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	log.Info("hostId = ", hostId)
+	websitePoint := model.NewWebSitePoint(hostId)
+	err := websitePoint.Get()
+	if err != nil {
+		c.APIOutPutError(err, "获取失败")
+		return
+	}
+	c.APIOutPut(websitePoint.Uri, "")
+	return
+}
+
+func WebsitePointDel(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	param := &WebsitePointParam{}
+	err := c.GetPostArgs(param)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	websitePoint := model.NewWebSitePoint(hostId)
+	err = websitePoint.Del(param.Uri)
+	if err != nil {
+		c.APIOutPutError(err, "删除失败:"+err.Error())
+		return
+	}
+	c.APIOutPut(websitePoint.Uri, "删除成功")
+	return
+}
+
+func Case1(c *ginHelper.GinCtx) {
+	//mLog := business.MonitorLog{
+	//	LogType:         "Info",
+	//	Time:            utils.NowDate(),
+	//	HostId:          "1",
+	//	Host:            "test",
+	//	Uri:             "uri",
+	//	UriCode:         200,
+	//	UriMs:           100,
+	//	ContrastUri:     "ContrastUri",
+	//	ContrastUriCode: 200,
+	//	ContrastUriMs:   30,
+	//}
+	//mLog.Write()
+
+	//webSiteUri := model.NewWebSiteUri("1")
+	//webSiteUri.Collect("www.33633.cn", 2)
+	//data, err := webSiteUri.Get()
+	//if err != nil {
+	//	c.APIOutPutError(err, "")
+	//	return
+	//}
+	//c.APIOutPut(data, "")
+	//return
+	gt.ClosePingTerminalPrint()
+	t, err := gt.Ping("101.226.4.6")
+	log.Info(t, err)
+
 }

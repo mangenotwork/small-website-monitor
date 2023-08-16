@@ -10,14 +10,17 @@ import (
 
 var (
 	DBPath = "./data.db"
-	Tables = []string{WebSiteTable, MailTable}
+	Tables = []string{WebSiteTable, MailTable, WebSiteURITable, WebSitePointTable}
 	DB     = NewLocalDB(DBPath, Tables)
+	ISNULL = fmt.Errorf("ISNULL")
 )
 
 const (
-	WebSiteTable = "website_table"
-	MailTable    = "mail_table"
-	MailConf     = "mail_conf"
+	WebSiteTable      = "website_table"
+	MailTable         = "mail_table"
+	MailConf          = "mail_conf"
+	WebSiteURITable   = "website_uri_table"
+	WebSitePointTable = "website_point_table"
 )
 
 type LocalDB struct {
@@ -80,6 +83,9 @@ func (ldb *LocalDB) Get(table, key string, data interface{}) error {
 			goto R
 		}
 		bt := b.Get([]byte(key))
+		if len(bt) < 1 {
+			return ISNULL
+		}
 		err := json.Unmarshal(bt, data)
 		if err != nil {
 			return err

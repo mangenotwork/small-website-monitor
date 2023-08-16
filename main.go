@@ -3,9 +3,12 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mangenotwork/common/conf"
+	"log"
+	"net/http"
 	"small-website-monitor/business"
 	"small-website-monitor/model"
 	"small-website-monitor/routers"
+	"time"
 )
 
 func main() {
@@ -13,15 +16,15 @@ func main() {
 	model.DB.Init()
 	business.Monitor()
 	gin.SetMode(gin.ReleaseMode)
-	s := routers.Routers()
-	s.Run(":" + conf.Conf.Default.HttpServer.Prod)
-
-	//server := &http.Server{
-	//	Addr:           ":" + conf.Conf.Default.HttpServer.Prod,
-	//	Handler:        routers.Routers(),
-	//	ReadTimeout:    10 * time.Second,
-	//	WriteTimeout:   10 * time.Second,
-	//	MaxHeaderBytes: 1 << 20,
-	//}
-	//server.ListenAndServe()
+	server := &http.Server{
+		Addr:           ":" + conf.Conf.Default.HttpServer.Prod,
+		Handler:        routers.Routers(),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Panic(err)
+	}
 }

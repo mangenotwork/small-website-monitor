@@ -35,12 +35,13 @@ type WebSite struct {
 	Created int64
 }
 
-func (m *WebSite) Add() error {
+func (m *WebSite) Add() (string, error) {
 	DB.Open()
 	defer func() {
 		_ = DB.Conn.Close()
 	}()
-	return DB.Conn.Update(func(tx *bolt.Tx) error {
+	websiteId := ""
+	err := DB.Conn.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(WebSiteTable))
 		if b == nil {
 			return fmt.Errorf(WebSiteTable + "表不存在")
@@ -59,6 +60,7 @@ func (m *WebSite) Add() error {
 			return err
 		}
 		log.Info("m.ID = ", m.ID)
+		websiteId = m.ID
 		err = b.Put([]byte(m.ID), value)
 		if err != nil {
 			log.Error(err)
@@ -66,6 +68,7 @@ func (m *WebSite) Add() error {
 		}
 		return nil
 	})
+	return websiteId, err
 }
 
 // List 分页获取

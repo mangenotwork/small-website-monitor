@@ -24,5 +24,7 @@ func LoginPage(c *gin.Context) {
 }
 
 func HomePage(c *gin.Context) {
-	c.HTML(200, "home.html", gin.H{})
+	c.HTML(200, "home.html", gin.H{
+		"Title": conf.Conf.Default.App.Name,
+	})
 }
