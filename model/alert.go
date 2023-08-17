@@ -22,3 +22,21 @@ func NewWebSiteAlert(hostId string) *WebSiteAlert {
 		List:   make([]*AlertData, 0),
 	}
 }
+
+func (m *WebSiteAlert) Get() error {
+	return DB.Get(WebSiteAlertTable, m.HostID, m)
+}
+
+func (m *WebSiteAlert) Add(alert *AlertData) error {
+	err := m.Get()
+	if err != nil && err != ISNULL {
+		return err
+	}
+	m.List = append(m.List, alert)
+	return DB.Set(WebSiteAlertTable, m.HostID, m)
+}
+
+func (m *WebSiteAlert) Clear() error {
+	m.List = m.List[:0]
+	return DB.Set(WebSiteAlertTable, m.HostID, m)
+}

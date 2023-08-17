@@ -293,6 +293,25 @@ func WebsitePointDel(c *ginHelper.GinCtx) {
 	return
 }
 
+type WebsiteInfoOut struct {
+	*model.WebSite
+	*model.WebSiteUri
+}
+
+func WebsiteInfo(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	website, err := new(model.WebSite).Get(hostId)
+	if err != nil {
+		c.APIOutPutError(err, "获取失败:"+err.Error())
+		return
+	}
+	websiteList := model.NewWebSiteUri(hostId)
+	_, _ = websiteList.Get()
+	data := &WebsiteInfoOut{website, websiteList}
+	c.APIOutPut(data, "删除成功")
+	return
+}
+
 func Case1(c *ginHelper.GinCtx) {
 	//mLog := business.MonitorLog{
 	//	LogType:         "Info",
@@ -317,8 +336,30 @@ func Case1(c *ginHelper.GinCtx) {
 	//}
 	//c.APIOutPut(data, "")
 	//return
-	gt.ClosePingTerminalPrint()
-	t, err := gt.Ping("101.226.4.6")
-	log.Info(t, err)
+	//gt.ClosePingTerminalPrint()
+	//t, err := gt.Ping("101.226.4.6")
+	//log.Info(t, err)
+
+	//date := utils.NowDate()
+	//// 记录报警
+	//alertObj := model.NewWebSiteAlert("1")
+	//err := alertObj.Add(&model.AlertData{
+	//	Date:          date,
+	//	Uri:           "test uri",
+	//	UriCode:       200,
+	//	UriMs:         100,
+	//	ContrastUriMs: 100,
+	//	PingMs:        100,
+	//	Msg:           "测试测试",
+	//})
+	//if err != nil {
+	//	log.Error("记录报警信息失败:" + err.Error())
+	//}
+	//
+	//err = alertObj.Get()
+	//if err != nil {
+	//	log.Error(err)
+	//}
+	//c.APIOutPut(alertObj.List, "")
 
 }

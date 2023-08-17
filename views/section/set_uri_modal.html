@@ -18,7 +18,7 @@
                 <hr>
                 <ul class="list-group list-group-flush" style="height: 360px; overflow: auto;">
                     <template v-for="item in point.uriList">
-                        <li class="list-group-item">
+                        <li class="list-group-item list-group-item-action">
                             <span>{{ item }}</span>
                             <a @click="delUriPoint(item)" style="float: right;"><img src="/static/bootstrap/img/trash-fill.svg" alt="" width="18" height="18"></a>
                         </li>

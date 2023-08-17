@@ -51,6 +51,11 @@ const app = createApp({
                 },
                 uriList: [],
                 nowUri: "",
+            },
+            websiteInfo: {
+                hostId: "",
+                api: "/api/website/info/",
+                data: {}
             }
         }
     },
@@ -134,6 +139,9 @@ const app = createApp({
 
         setMailConf: function () {
             var t = this;
+            if (Array.isArray(t.mailConf.param.toList)) {
+                t.mailConf.param.toList = t.mailConf.param.toList.join("");
+            }
             $.ajax({
                 type: "post",
                 url: t.mailConf.api,
@@ -179,6 +187,9 @@ const app = createApp({
 
         mailSendTest: function () {
             var t = this;
+            if (Array.isArray(t.mailConf.param.toList)) {
+                t.mailConf.param.toList = t.mailConf.param.toList.join("");
+            }
             t.mailConf.param.port = Number(t.mailConf.param.port);
             $.ajax({
                 type: "post",
@@ -201,7 +212,7 @@ const app = createApp({
 
         setUriPoint: function (item) {
             var t = this;
-            t.point.hostUri = "https://" + item.HealthUri + "/";
+            t.point.hostUri = item.HealthUri + "/";
             t.point.hostId = item.ID;
             console.log(t.point.hostId);
             t.getUriPoint();
@@ -278,6 +289,32 @@ const app = createApp({
                 }
             });
         },
+
+        openWebsiteInfo: function (id) {
+            var t = this;
+            t.websiteInfo.hostId = id;
+            $.ajax({
+                type: "get",
+                url: t.websiteInfo.api+t.websiteInfo.hostId,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    if (data.code === 0) {
+                        t.websiteInfo.data = data.data;
+                        $("#websiteInfoModal").modal('show');
+                    } else {
+                        t.msg = data.msg;
+                        const toastLiveExample = document.getElementById('liveToast')
+                        const toast = new bootstrap.Toast(toastLiveExample)
+                        toast.show()
+                    }
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        }
 
     },
     computed: {

@@ -42,21 +42,26 @@
                                 <td>33ms</td>
                                 <td>12ms</td>
                                 <td>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
-                                        <img src="/static/bootstrap/img/gear-fill.svg" alt="" width="18" height="18"> <span style="font-size: 12px;"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" @click="setUriPoint(item)">
-                                        <img src="/static/bootstrap/img/broadcast.svg" alt="" width="18" height="18"> <span style="font-size: 10px;">监测点</span>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm">
-                                        <img src="/static/bootstrap/img/file-text-fill.svg" alt="" width="18" height="18"> <span style="font-size: 10px;">日志</span>
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm">
-                                        <img src="/static/bootstrap/img/graph-up.svg" alt="" width="18" height="18">
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm">
-                                        <img src="/static/bootstrap/img/trash-fill.svg" alt="" width="18" height="18">
-                                    </button>
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
+                                            <img src="/static/bootstrap/img/gear-fill.svg" alt="" width="18" height="18"> <span style="font-size: 12px;"></span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="openWebsiteInfo(item.ID)">
+                                            <img src="/static/bootstrap/img/house-fill.svg" alt="" width="18" height="18">
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="setUriPoint(item)">
+                                            <img src="/static/bootstrap/img/broadcast.svg" alt="" width="18" height="18"> <span style="font-size: 10px;">监测点</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                                            <img src="/static/bootstrap/img/file-text-fill.svg" alt="" width="18" height="18"> <span style="font-size: 10px;">日志</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                                            <img src="/static/bootstrap/img/graph-up.svg" alt="" width="18" height="18">
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                                            <img src="/static/bootstrap/img/trash-fill.svg" alt="" width="18" height="18">
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
@@ -76,6 +81,7 @@
             {[ template "set_alert_modal.html" . ]}
             {[ template "set_uri_modal.html" . ]}
             {[ template "mail_set_modal.html" . ]}
+            {[ template "website_info_modal.html" . ]}
 
             <!-- 查看配置 -->
             <div class="modal fade" id="confModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confModalLabel" aria-hidden="true">
@@ -95,6 +101,8 @@
                     </div>
                 </div>
             </div>
+
+
 
             <div class="toast-container p-3 top-50 start-50 translate-middle">
                 <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">

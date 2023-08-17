@@ -142,8 +142,6 @@ type WebSiteItem struct {
 func (item *WebSiteItem) Run() {
 	item.RateItem--
 	if item.RateItem <= 0 {
-		// 是否报警
-		isAlert := false
 		// 报警数据初始化
 		alert := &model.AlertBody{
 			Synopsis: utils.NowDate() + "监测到站点出现问题，请快速前往检查并处理!",
@@ -172,13 +170,13 @@ func (item *WebSiteItem) Run() {
 			return
 		}
 		// 监测生命URI
-		isAlert = item.MonitorHealthUri(mLog, alert)
+		isAlert1 := item.MonitorHealthUri(mLog, alert)
 		// 随机URI监测
-		isAlert = item.MonitorRandomUri(mLog, alert)
+		isAlert2 := item.MonitorRandomUri(mLog, alert)
 		// 循环监测点监测
-		isAlert = item.MonitorPointUri(mLog, alert)
+		isAlert3 := item.MonitorPointUri(mLog, alert)
 		// 发邮件
-		if isAlert {
+		if isAlert1 || isAlert2 || isAlert3 {
 			now := time.Now().Unix()
 			if now-global.LastSendMail < 60 {
 				log.Info("邮件发送太频繁，保持1分钟的间隔")
@@ -232,6 +230,7 @@ func (item *WebSiteItem) Ping(mLog *MonitorLog) (int64, bool) {
 		mLog.LogType = LogTypeError
 		mLog.Msg = "网络不通请前往检查监测平台!" + err.Error()
 		mLog.Write()
+		model.SetMonitorErrInfo(mLog.Msg)
 		return 0, false
 	}
 	pingMs := ping.Milliseconds()
@@ -240,6 +239,7 @@ func (item *WebSiteItem) Ping(mLog *MonitorLog) (int64, bool) {
 		mLog.LogType = LogTypeError
 		mLog.Msg = fmt.Sprintf("网络环境缓慢，超过1s(%d)请前往检查监测平台!", pingMs)
 		mLog.Write()
+		model.SetMonitorErrInfo(mLog.Msg)
 		return pingMs, false
 	}
 	return pingMs, true
@@ -253,10 +253,12 @@ func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
 	if item.AlertRuleCode(contrastCode) {
 		contrastErr = true
 		mLog.Msg += fmt.Sprintf("对照组请求失败code=%d!", contrastCode)
+		model.SetMonitorErrInfo(mLog.Msg)
 	}
 	if contrastMs >= item.AlarmResTime {
 		contrastErr = true
 		mLog.Msg += fmt.Sprintf("请求对照组网络超时:%d!", contrastMs)
+		model.SetMonitorErrInfo(mLog.Msg)
 	}
 	if contrastErr {
 		mLog.LogType = LogTypeError
@@ -282,16 +284,29 @@ func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBo
 		healthAlert = true
 		mLog.LogType = LogTypeAlert
 		mLog.Msg = fmt.Sprintf("请求失败，状态码:%d;", healthCode)
-		// TODO 存储报警信息
 	}
 	if item.AlertRuleMs(healthMs) {
 		healthAlert = true
 		mLog.LogType = LogTypeAlert
 		mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d;", healthMs)
-		// TODO 存储报警信息
 	}
 	if healthAlert {
-		// 记录内容用于发邮件
+		date := utils.NowDate()
+		// 记录报警
+		alertObj := model.NewWebSiteAlert(item.ID)
+		err := alertObj.Add(&model.AlertData{
+			Date:          date,
+			Uri:           item.HealthUri,
+			UriCode:       healthCode,
+			UriMs:         healthMs,
+			ContrastUriMs: mLog.ContrastUriMs,
+			PingMs:        mLog.PingMs,
+			Msg:           mLog.Msg,
+		})
+		if err != nil {
+			log.Error("记录报警信息失败:" + err.Error())
+		}
+		// 记录信息用于发邮件通知
 		alert.Tr = append(alert.Tr, &model.AlertTd{
 			Date: utils.NowDate(),
 			Host: item.Host,
@@ -323,23 +338,35 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 		mLog.UriMs = randomMs
 		mLog.UriType = URIRandom
 		randomAlert := false
-		// 监测规则
 		if item.AlertRuleCode(randomCode) {
 			randomAlert = true
 			mLog.LogType = LogTypeAlert
 			mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", randomCode)
-			// TODO 存储报警信息
 		}
 		if item.AlertRuleMs(randomMs) {
 			randomAlert = true
 			mLog.LogType = LogTypeAlert
 			mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", randomMs)
-			// TODO 存储报警信息
 		}
 		if randomAlert {
+			date := utils.NowDate()
+			// 记录报警
+			alertObj := model.NewWebSiteAlert(item.ID)
+			err := alertObj.Add(&model.AlertData{
+				Date:          date,
+				Uri:           randomUri,
+				UriCode:       randomCode,
+				UriMs:         randomMs,
+				ContrastUriMs: mLog.ContrastUriMs,
+				PingMs:        mLog.PingMs,
+				Msg:           mLog.Msg,
+			})
+			if err != nil {
+				log.Error("记录报警信息失败:" + err.Error())
+			}
 			// 记录内容用于发邮件
 			alert.Tr = append(alert.Tr, &model.AlertTd{
-				Date: utils.NowDate(),
+				Date: date,
 				Host: item.Host,
 				Uri:  randomUri,
 				Code: randomCode,
@@ -353,7 +380,7 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 		mLog.Write() // 记录日志
 		return randomAlert
 	}
-	return true
+	return false
 }
 
 func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBody) bool {
@@ -376,19 +403,31 @@ func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBod
 				vAlert = true
 				mLog.LogType = LogTypeAlert
 				mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", pointCode)
-				// TODO 存储报警信息
 			}
 			if item.AlertRuleMs(pointMs) {
 				vAlert = true
 				mLog.LogType = LogTypeAlert
 				mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", pointMs)
-				// TODO 存储报警信息
 			}
 			if vAlert {
 				hasAlert = true
+				date := utils.NowDate()
+				alertObj := model.NewWebSiteAlert(item.ID)
+				err = alertObj.Add(&model.AlertData{
+					Date:          date,
+					Uri:           v,
+					UriCode:       pointCode,
+					UriMs:         pointMs,
+					ContrastUriMs: mLog.ContrastUriMs,
+					PingMs:        mLog.PingMs,
+					Msg:           mLog.Msg,
+				})
+				if err != nil {
+					log.Error("记录报警信息失败:" + err.Error())
+				}
 				// 记录内容用于发邮件
 				alert.Tr = append(alert.Tr, &model.AlertTd{
-					Date: utils.NowDate(),
+					Date: date,
 					Host: item.Host,
 					Uri:  v,
 					Code: pointCode,
