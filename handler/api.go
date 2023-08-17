@@ -29,12 +29,13 @@ func Login(c *gin.Context) {
 			}
 			c.SetCookie(global.UserToken, token, global.TokenExpires,
 				"/", "", false, true)
-			c.HTML(200, "home.html", gin.H{})
+			c.Redirect(http.StatusFound, "/home")
 			return
 		}
 	}
 	c.HTML(200, "err.html", gin.H{
-		"err": "账号或密码错误!",
+		"Title": conf.Conf.Default.App.Name,
+		"err":   "账号或密码错误",
 	})
 	return
 }

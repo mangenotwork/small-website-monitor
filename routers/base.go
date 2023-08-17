@@ -23,10 +23,6 @@ func Routers() *gin.Engine {
 	Login()
 	Page()
 	API()
-	Router.NoRoute(func(c *gin.Context) {
-		// 实现内部重定向
-		c.HTML(http.StatusOK, "notfond.html", gin.H{})
-	})
 	return Router
 }
 
@@ -38,6 +34,10 @@ func Login() {
 }
 
 func Page() {
+	// 404 && 405 && err page
+	Router.NoRoute(handler.NotFond)
+	Router.NoMethod(handler.NotFond)
+	// page group
 	pg := Router.Group("")
 	pg.Use(AuthPG())
 	pg.GET("/home", handler.HomePage)
