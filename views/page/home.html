@@ -208,6 +208,9 @@
         methods: {
            addWebSiteMonitor: function () {
                var t = this;
+               t.addWebSite.param.rate = Number(t.addWebSite.param.rate);
+               t.addWebSite.param.alarmResTime = Number(t.addWebSite.param.alarmResTime);
+               t.addWebSite.param.uriDepth = Number(t.addWebSite.param.uriDepth);
                $.ajax({
                    type: "post",
                    url: t.addWebSite.api,
@@ -321,10 +324,11 @@
 
             mailSendTest: function () {
                 var t = this;
+                t.mailConf.param.port = Number(t.mailConf.param.port);
                 $.ajax({
-                    type: "get",
+                    type: "post",
                     url: t.mailSend.api,
-                    data: "",
+                    data: JSON.stringify(t.mailConf.param),
                     dataType: 'json',
                     success: function(data){
                         console.log(data)
@@ -337,6 +341,7 @@
                         console.log(xhr, textStatus);
                     }
                 });
+
             },
 
             setUriPoint: function (item) {

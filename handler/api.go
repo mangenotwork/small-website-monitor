@@ -85,7 +85,7 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 	}
 	website := &model.WebSite{
 		Host:          param.Host,
-		HealthUri:     param.HealthUri,
+		HealthUri:     utils.URIStr(param.HealthUri),
 		Rate:          param.Rate,
 		UriDepth:      param.UriDepth,
 		UriUpdateRate: param.UriUpdateRate,
@@ -100,11 +100,13 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 		return
 	}
 
-	// 更新站点对象
-	business.Push()
-	// 采集站点URI相关信息
-	webSiteUri := model.NewWebSiteUri(websiteId)
-	webSiteUri.Collect(website.HealthUri, int(website.UriDepth))
+	go func() {
+		// 更新站点对象
+		business.Push()
+		// 采集站点URI相关信息
+		webSiteUri := model.NewWebSiteUri(websiteId)
+		webSiteUri.Collect(website.HealthUri, int(website.UriDepth))
+	}()
 
 	c.APIOutPut("", "添加成功")
 	return
@@ -159,28 +161,23 @@ type MailConfParam struct {
 	ToList   string `json:"toList"`
 }
 
-func MailConf(c *ginHelper.GinCtx) {
+func mailSet(c *ginHelper.GinCtx) error {
 	param := &MailConfParam{}
 	err := c.GetPostArgs(param)
 	if err != nil {
-		c.APIOutPutError(err, err.Error())
-		return
+		return err
 	}
 	if len(param.From) < 1 {
-		c.APIOutPutError(nil, "发件人不能为空!")
-		return
+		return fmt.Errorf("%s", "发件人不能为空!")
 	}
 	if len(param.Host) < 1 {
-		c.APIOutPutError(nil, "邮件服务器不能为空!")
-		return
+		return fmt.Errorf("%s", "邮件服务器不能为空!")
 	}
 	if len(param.AuthCode) < 1 {
-		c.APIOutPutError(nil, "邮件服务授权码不能为空!")
-		return
+		return fmt.Errorf("%s", "邮件服务授权码不能为空!")
 	}
 	if len(param.ToList) < 1 {
-		c.APIOutPutError(nil, "通知收件人不能为空!")
-		return
+		return fmt.Errorf("%s", "通知收件人不能为空!")
 	}
 	param.ToList = utils.CleaningStr(param.ToList)
 	toList := strings.Split(param.ToList, ";")
@@ -191,9 +188,13 @@ func MailConf(c *ginHelper.GinCtx) {
 		Port:     param.Port,
 		ToList:   toList,
 	}
-	err = model.SetMail(m)
+	return model.SetMail(m)
+}
+
+func MailConf(c *ginHelper.GinCtx) {
+	err := mailSet(c)
 	if err != nil {
-		c.APIOutPutError(nil, err.Error())
+		c.APIOutPutError(err, err.Error())
 		return
 	}
 	c.APIOutPut("设置成功", "设置成功!")
@@ -217,6 +218,11 @@ type MailSendTestParam struct {
 }
 
 func MailSendTest(c *ginHelper.GinCtx) {
+	err := mailSet(c)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
 	title := "站点监控发送邮件通知测试"
 	body := `<p>您好欢迎使用小型站点监测平台(Small website monitor)</p>` +
 		`<p> 您的星星是我研发的动力!</p>` +

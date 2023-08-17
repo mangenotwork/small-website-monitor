@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/mangenotwork/common/log"
+	"github.com/mangenotwork/common/utils"
 )
 
 // WebSitePoint 站点监测点
@@ -51,4 +52,13 @@ func (m *WebSitePoint) Del(uri string) error {
 		}
 	}
 	return DB.Set(WebSitePointTable, m.HostID, m)
+}
+
+func (m *WebSitePoint) Random() string {
+	err := m.Get()
+	if err != nil {
+		log.Error(err)
+		return ""
+	}
+	return utils.RandomString(m.Uri)
 }

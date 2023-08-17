@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"github.com/mangenotwork/common/log"
 	"github.com/mangenotwork/common/mail"
 )
@@ -62,4 +63,33 @@ func SendTest(title, body string, to []string) {
 		log.Error(err)
 		return
 	}
+}
+
+// AlertBody 报警通知
+type AlertBody struct {
+	Synopsis string
+	Tr       []*AlertTd
+}
+
+type AlertTd struct {
+	Date string
+	Host string
+	Uri  string
+	Code int
+	Ms   int64
+	Msg  string
+}
+
+func (a *AlertBody) Html() string {
+	body := ""
+	synopsis := fmt.Sprintf("<h3>%s</h3>", a.Synopsis)
+	tr := ""
+	for _, v := range a.Tr {
+		tr += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%sms</td></tr>",
+			v.Date, v.Host, v.Uri, v.Code, v.Ms, v.Msg)
+	}
+	thead := "<thead><tr><td>监测时间</td><td>站点</td><td>链接</td><td>请求状态码</td><td>响应时间</td><td>报警信息</td></tr></thead>"
+	table := fmt.Sprintf("<table>%s<tbody>%s</tbody></table>", thead, tr)
+	body = synopsis + table
+	return body
 }

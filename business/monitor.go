@@ -5,6 +5,7 @@ import (
 	"github.com/mangenotwork/common/log"
 	"github.com/mangenotwork/common/utils"
 	gt "github.com/mangenotwork/gathertool"
+	"small-website-monitor/global"
 	"small-website-monitor/model"
 	"sync"
 	"time"
@@ -19,14 +20,13 @@ func HttpCodeIsHealth(code int) bool {
 }
 
 /*
-	// 追加设置报警的http state code, 默认400, 404, >500
-	AlarmStateCode []int64
-
-*/
-
-/*
 
 监控设计
+
+监控原理: 对Uri进行请求通过响应状态码和响应时间进行判断，
+在此基础上需要有对照组和当前网络情况作为前置条件加以判断前提，
+并且对站点进行根Uri+随机Uri+指定监测点进行组合监测，
+最终实现监测。
 
 前置: 服务启动后获取监测站点列表持久数据到站点对象
 
@@ -38,9 +38,6 @@ func HttpCodeIsHealth(code int) bool {
 2. 触发执行: 执行请求生命Uri + 随机监测点 + 对照组
 3. 记录结果
 
-
-记录结果存储到日志文件，定义一下格式  ok
-TODO 1小时采集一次URI, 没有数据则立即采集
 TODO 内存缓存记录记总监测结果
 
 
@@ -141,108 +138,55 @@ type WebSiteItem struct {
 	RateItem int64 // 用于计算
 }
 
-// Run 计算执行频率
+// Run 执行监测
 func (item *WebSiteItem) Run() {
 	item.RateItem--
-	// log.Info("item.RateItem = ", item.RateItem)
 	if item.RateItem <= 0 {
+		// 是否报警
+		isAlert := false
+		// 报警数据初始化
+		alert := &model.AlertBody{
+			Synopsis: utils.NowDate() + "监测到站点出现问题，请快速前往检查并处理!",
+			Tr:       make([]*model.AlertTd, 0),
+		}
+		// 计算频率复位
 		item.RateItem = item.Rate
 		log.Info("执行 " + item.HealthUri)
+		// 日志数据
 		mLog := &MonitorLog{
 			LogType:     "Info",
 			Time:        utils.NowDate(),
 			HostId:      item.ID,
 			Host:        item.Host,
-			ContrastUri: Contrast,
+			ContrastUri: ContrastUri,
 			Ping:        Ping,
 		}
-		ping, err := gt.Ping(Ping)
-		if err != nil {
-			log.Error("网络不通请前往检查监测平台!", err.Error())
-			mLog.LogType = LogTypeError
-			mLog.Msg = "网络不通请前往检查监测平台!" + err.Error()
-			mLog.Write()
+		// ping一下，检查当前网络环境
+		_, pingRse := item.Ping(mLog)
+		if !pingRse {
+			// 网络环境异常不执行监测
 			return
 		}
-		pingMs := ping.Milliseconds()
-		mLog.PingMs = pingMs
-		if pingMs >= 1000 {
-			log.Error("网络环境缓慢，超过1s请前往检查监测平台!")
-			mLog.LogType = LogTypeError
-			mLog.Msg = "网络环境缓慢，超过1s请前往检查监测平台!"
-			mLog.Write()
-			return
-		}
-		contrastCode, contrastMs := request(Contrast)
-		mLog.ContrastUriCode = contrastCode
-		mLog.ContrastUriMs = contrastMs
-		if item.AlertRuleCode(contrastCode) {
-			log.Error("对照组请求失败，请前往检查监测平台的网络!")
-			mLog.LogType = LogTypeError
-			mLog.Msg = "对照组请求失败，请前往检查监测平台的网络!"
-			mLog.Write()
-			return
-		}
-		if contrastMs >= item.AlarmResTime {
-			log.Error("请求对照组网络超时，请前往检查监测平台的网络!")
-			mLog.LogType = LogTypeError
-			mLog.Msg = "请求对照组网络超时，请前往检查监测平台的网络!"
-			mLog.Write()
+		// 请求对照组，对照组有问题不执行监测
+		if !item.Contrast(mLog) {
 			return
 		}
 		// 监测生命URI
-		HealthCode, HealthMs := request(item.HealthUri)
-		mLog.Uri = item.HealthUri
-		mLog.UriCode = HealthCode
-		mLog.UriMs = HealthMs
-		mLog.UriType = URIHealth
-		// 监测规则
-		if item.AlertRuleCode(HealthCode) {
-			log.Error("执行报警!")
-			mLog.LogType = LogTypeAlert
-			mLog.Msg = fmt.Sprintf("请求失败，状态码:%d;", HealthCode)
-			// TODO 记录内容用于发邮件
-		}
-		if item.AlertRuleMs(HealthMs) {
-			log.Error("执行报警!")
-			mLog.LogType = LogTypeAlert
-			mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d;", HealthMs)
-			// TODO 记录内容用于发邮件
-		}
-		mLog.Write() // 记录日志
-
-		// 随机取一个URI监测
-		uri := model.NewWebSiteUri(item.ID)
-		_, _ = uri.Get()
-		if len(uri.AllUri) > 0 {
-			mLog.LogType = LogTypeInfo
-			mLog.Msg = ""
-			randomUri := utils.RandomString(uri.AllUri)
-			randomCode, randomMs := request(randomUri)
-			mLog.Uri = randomUri
-			mLog.UriCode = randomCode
-			mLog.UriMs = randomMs
-			mLog.UriType = URIRandom
-			// 监测规则
-			if item.AlertRuleCode(HealthCode) {
-				log.Error("执行报警!")
-				mLog.LogType = LogTypeAlert
-				mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", HealthCode)
-				// TODO 记录内容用于发邮件
+		isAlert = item.MonitorHealthUri(mLog, alert)
+		// 随机URI监测
+		isAlert = item.MonitorRandomUri(mLog, alert)
+		// 循环监测点监测
+		isAlert = item.MonitorPointUri(mLog, alert)
+		// 发邮件
+		if isAlert {
+			now := time.Now().Unix()
+			if now-global.LastSendMail < 60 {
+				log.Info("邮件发送太频繁，保持1分钟的间隔")
+			} else {
+				global.LastSendMail = now
+				model.Send(utils.NowDate()+"监测到站点出现问题，请前往查看!", alert.Html())
 			}
-			if item.AlertRuleMs(HealthMs) {
-				log.Error("执行报警!")
-				mLog.LogType = LogTypeAlert
-				mLog.Msg = fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", HealthMs)
-				// TODO 记录内容用于发邮件
-			}
-			mLog.Write() // 记录日志
 		}
-
-		// TODO 循环监测点监测
-
-		// TODO 统一发邮件，这里需要注意 读一个时间锁，目的是为了防止短时间内频繁发送邮件
-
 	}
 }
 
@@ -269,8 +213,8 @@ func (item *WebSiteItem) AlertRuleMs(nowMs int64) bool {
 	return false
 }
 
-// Contrast TODO 对照组
-var Contrast = "www.baidu.com"
+// ContrastUri TODO 对照组 和 ping 写入配置
+var ContrastUri = "www.baidu.com"
 var Ping = "101.226.4.6"
 
 func request(url string) (int, int64) {
@@ -280,4 +224,183 @@ func request(url string) (int, int64) {
 		return 0, 0
 	}
 	return ctx.StateCode, ctx.Ms.Milliseconds()
+}
+
+func (item *WebSiteItem) Ping(mLog *MonitorLog) (int64, bool) {
+	ping, err := gt.Ping(Ping)
+	if err != nil {
+		mLog.LogType = LogTypeError
+		mLog.Msg = "网络不通请前往检查监测平台!" + err.Error()
+		mLog.Write()
+		return 0, false
+	}
+	pingMs := ping.Milliseconds()
+	mLog.PingMs = pingMs
+	if pingMs >= 1000 {
+		mLog.LogType = LogTypeError
+		mLog.Msg = fmt.Sprintf("网络环境缓慢，超过1s(%d)请前往检查监测平台!", pingMs)
+		mLog.Write()
+		return pingMs, false
+	}
+	return pingMs, true
+}
+
+func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
+	contrastCode, contrastMs := request(ContrastUri)
+	mLog.ContrastUriCode = contrastCode
+	mLog.ContrastUriMs = contrastMs
+	contrastErr := false
+	if item.AlertRuleCode(contrastCode) {
+		contrastErr = true
+		mLog.Msg += fmt.Sprintf("对照组请求失败code=%d!", contrastCode)
+	}
+	if contrastMs >= item.AlarmResTime {
+		contrastErr = true
+		mLog.Msg += fmt.Sprintf("请求对照组网络超时:%d!", contrastMs)
+	}
+	if contrastErr {
+		mLog.LogType = LogTypeError
+		mLog.Write()
+		return false
+	}
+	return true
+}
+
+func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+	// =================================  监测生命URI
+	log.Info("=================================  监测生命URI... ")
+	healthCode, healthMs := request(item.HealthUri)
+	mLog.Uri = item.HealthUri
+	mLog.UriCode = healthCode
+	mLog.UriMs = healthMs
+	mLog.UriType = URIHealth
+	mLog.LogType = LogTypeInfo
+	mLog.Msg = ""
+	healthAlert := false
+	// 监测规则
+	if item.AlertRuleCode(healthCode) {
+		healthAlert = true
+		mLog.LogType = LogTypeAlert
+		mLog.Msg = fmt.Sprintf("请求失败，状态码:%d;", healthCode)
+		// TODO 存储报警信息
+	}
+	if item.AlertRuleMs(healthMs) {
+		healthAlert = true
+		mLog.LogType = LogTypeAlert
+		mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d;", healthMs)
+		// TODO 存储报警信息
+	}
+	if healthAlert {
+		// 记录内容用于发邮件
+		alert.Tr = append(alert.Tr, &model.AlertTd{
+			Date: utils.NowDate(),
+			Host: item.Host,
+			Uri:  item.HealthUri,
+			Code: healthCode,
+			Ms:   healthMs,
+			Msg:  mLog.Msg,
+		})
+	}
+	if mLog.LogType == LogTypeInfo {
+		mLog.Msg = "passed"
+	}
+	mLog.Write() // 记录日志
+	return healthAlert
+}
+
+func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+	// =================================  随机取一个URI监测
+	log.Info("=================================  随机取一个URI监测... ")
+	uri := model.NewWebSiteUri(item.ID)
+	_, _ = uri.Get()
+	if len(uri.AllUri) > 0 {
+		mLog.LogType = LogTypeInfo // 复位
+		mLog.Msg = ""              // 复位
+		randomUri := utils.RandomString(uri.AllUri)
+		randomCode, randomMs := request(randomUri)
+		mLog.Uri = randomUri
+		mLog.UriCode = randomCode
+		mLog.UriMs = randomMs
+		mLog.UriType = URIRandom
+		randomAlert := false
+		// 监测规则
+		if item.AlertRuleCode(randomCode) {
+			randomAlert = true
+			mLog.LogType = LogTypeAlert
+			mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", randomCode)
+			// TODO 存储报警信息
+		}
+		if item.AlertRuleMs(randomMs) {
+			randomAlert = true
+			mLog.LogType = LogTypeAlert
+			mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", randomMs)
+			// TODO 存储报警信息
+		}
+		if randomAlert {
+			// 记录内容用于发邮件
+			alert.Tr = append(alert.Tr, &model.AlertTd{
+				Date: utils.NowDate(),
+				Host: item.Host,
+				Uri:  randomUri,
+				Code: randomCode,
+				Ms:   randomMs,
+				Msg:  mLog.Msg,
+			})
+		}
+		if mLog.LogType == LogTypeInfo {
+			mLog.Msg = "passed"
+		}
+		mLog.Write() // 记录日志
+		return randomAlert
+	}
+	return true
+}
+
+func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+	// =================================  循环监测点监测
+	point := model.NewWebSitePoint(item.ID)
+	err := point.Get()
+	hasAlert := false
+	if err == nil && len(point.Uri) > 0 {
+		for _, v := range point.Uri {
+			mLog.LogType = LogTypeInfo // 复位
+			mLog.Msg = ""              // 复位
+			pointCode, pointMs := request(v)
+			mLog.Uri = v
+			mLog.UriCode = pointCode
+			mLog.UriMs = pointMs
+			mLog.UriType = URIPoint
+			vAlert := false
+			// 监测规则
+			if item.AlertRuleCode(pointCode) {
+				vAlert = true
+				mLog.LogType = LogTypeAlert
+				mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", pointCode)
+				// TODO 存储报警信息
+			}
+			if item.AlertRuleMs(pointMs) {
+				vAlert = true
+				mLog.LogType = LogTypeAlert
+				mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", pointMs)
+				// TODO 存储报警信息
+			}
+			if vAlert {
+				hasAlert = true
+				// 记录内容用于发邮件
+				alert.Tr = append(alert.Tr, &model.AlertTd{
+					Date: utils.NowDate(),
+					Host: item.Host,
+					Uri:  v,
+					Code: pointCode,
+					Ms:   pointMs,
+					Msg:  mLog.Msg,
+				})
+			}
+			if mLog.LogType == LogTypeInfo {
+				mLog.Msg = "passed"
+			}
+			mLog.Write() // 记录日志
+		}
+	}
+	return hasAlert
 }

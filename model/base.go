@@ -8,19 +8,23 @@ import (
 	"github.com/mangenotwork/common/utils"
 )
 
-var (
-	DBPath = "./data.db"
-	Tables = []string{WebSiteTable, MailTable, WebSiteURITable, WebSitePointTable}
-	DB     = NewLocalDB(DBPath, Tables)
-	ISNULL = fmt.Errorf("ISNULL")
+const (
+	WebSiteTable        = "website_table"
+	MailTable           = "mail_table"
+	MailConf            = "mail_conf"
+	WebSiteURITable     = "website_uri_table"
+	WebSitePointTable   = "website_point_table"
+	WebSiteAlertTable   = "website_alert_table"
+	MonitorErrInfoKey   = "MonitorErrInfo"
+	MonitorErrInfoTable = "monitor_err_info_table"
 )
 
-const (
-	WebSiteTable      = "website_table"
-	MailTable         = "mail_table"
-	MailConf          = "mail_conf"
-	WebSiteURITable   = "website_uri_table"
-	WebSitePointTable = "website_point_table"
+var (
+	DBPath = "./data.db"
+	Tables = []string{WebSiteTable, MailTable, WebSiteURITable, WebSitePointTable,
+		WebSiteAlertTable, MonitorErrInfoTable}
+	DB     = NewLocalDB(DBPath, Tables)
+	ISNULL = fmt.Errorf("ISNULL")
 )
 
 type LocalDB struct {
@@ -30,7 +34,6 @@ type LocalDB struct {
 }
 
 func NewLocalDB(path string, tables []string) *LocalDB {
-	log.Info("初始化DB")
 	return &LocalDB{
 		Path:   path,
 		Tables: tables,
@@ -46,7 +49,7 @@ func (ldb *LocalDB) Init() {
 		_ = db.Close()
 	}()
 	for _, table := range ldb.Tables {
-		log.Info("初始化表 : ", table)
+		log.Info("检查数据表 : ", table)
 		err = db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(table))
 			if b == nil {
@@ -138,7 +141,6 @@ func (ldb *LocalDB) Delete(table, key string) error {
 	})
 }
 
-// ClearTable  创建表
 func (ldb *LocalDB) ClearTable(table string) error {
 	ldb.Open()
 	defer func() {

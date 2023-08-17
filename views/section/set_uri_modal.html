@@ -7,15 +7,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
                 <div class="mb-3">
-                    <div class="form-text" style="color: red;">添加的监测URI是可访问的，不然会产生误报.</div>
                     <div class="input-group">
                         <span class="input-group-text" id="basic-addon3">{{ point.hostUri }}</span>
                         <input type="text" class="form-control" v-model="point.nowUri" aria-describedby="basic-addon3">
                     </div>
                 </div>
-
                 <button type="button" class="btn btn-light" @click="addUriPoint">确认添加监测点</button>
                 <br>
                 <hr>
@@ -27,9 +24,7 @@
                         </li>
                     </template>
                 </ul>
-
             </div>
-
             <div class="modal-footer">
             </div>
         </div>
