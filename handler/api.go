@@ -12,6 +12,7 @@ import (
 	"small-website-monitor/business"
 	"small-website-monitor/global"
 	"small-website-monitor/model"
+	"sort"
 	"strings"
 	"time"
 )
@@ -309,6 +310,75 @@ func WebsiteInfo(c *ginHelper.GinCtx) {
 	_, _ = websiteList.Get()
 	data := &WebsiteInfoOut{website, websiteList}
 	c.APIOutPut(data, "")
+	return
+}
+
+func AlertList(c *ginHelper.GinCtx) {
+	websiteList, err := new(model.WebSite).GetAll()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	data := make([]string, 0)
+	for _, v := range websiteList {
+		alert := model.NewWebSiteAlert(v.ID)
+		err = alert.Get()
+		if err != nil {
+			log.Error(err)
+			continue
+		}
+		for _, a := range alert.List {
+			data = append(data, fmt.Sprintf("%s : %s | %s", a.Date, a.Uri, a.Msg))
+		}
+	}
+	sort.Slice(data, func(i, j int) bool {
+		return data[i] > data[j]
+	})
+	c.APIOutPut(data, "")
+	return
+}
+
+func AlertClear(c *ginHelper.GinCtx) {
+	websiteList, err := new(model.WebSite).GetAll()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	var hasErr error
+	for _, v := range websiteList {
+		alert := model.NewWebSiteAlert(v.ID)
+		hasErr = alert.Clear()
+	}
+	if err != nil {
+		c.APIOutPutError(hasErr, "清空失败，err = "+hasErr.Error())
+		return
+	}
+	c.APIOutPut("", "清空完成")
+	return
+}
+
+func MonitorErrList(c *ginHelper.GinCtx) {
+	data := model.NewMonitorErrInfo()
+	err := data.Get()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	sort.Slice(data.List, func(i, j int) bool {
+		return data.List[i] > data.List[j]
+	})
+	c.APIOutPut(data.List, "")
+	return
+}
+
+func MonitorErrClear(c *ginHelper.GinCtx) {
+	data := model.NewMonitorErrInfo()
+	err := data.Clear()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut("", "清空成功")
 	return
 }
 

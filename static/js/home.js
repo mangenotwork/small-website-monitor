@@ -56,7 +56,20 @@ const app = createApp({
                 hostId: "",
                 api: "/api/website/info/",
                 data: {}
-            }
+            },
+            alertList: {
+                api: "/api/alert/list",
+                clear: "/api/alert/clear",
+                list: [],
+                len: 0,
+            },
+            monitorErrList: {
+                api: "/api/monitor/err/list",
+                clear: "/api/monitor/err/clear",
+                list: [],
+                len: 0,
+            },
+            isOk: "",
         }
     },
     created:function(){
@@ -64,6 +77,8 @@ const app = createApp({
         t.getList();
         t.getMail();
         t.getMailInfo();
+        t.getAlertList();
+        t.getMonitorErrList();
     },
     methods: {
 
@@ -113,6 +128,94 @@ const app = createApp({
                 success: function(data){
                     console.log(data)
                     t.websiteList.data = data.data;
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        getAlertList: function () {
+            var t = this;
+            $.ajax({
+                type: "get",
+                url: t.alertList.api,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.alertList.list = data.data;
+                    t.alertList.len = t.alertList.list.length;
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        alertClear: function () {
+            var t = this;
+            t.isOk = "alertClear";
+            $("#isOkModal").modal("show");
+        },
+
+        alertClearSubmit: function () {
+            var t = this;
+            console.log("alertClearSubmit")
+            $.ajax({
+                type: "get",
+                url: t.alertList.clear,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.toastShow(data.msg);
+                    t.getAlertList();
+                    $("#isOkModal").modal('toggle');
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        getMonitorErrList: function () {
+            var t = this;
+            $.ajax({
+                type: "get",
+                url: t.monitorErrList.api,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.monitorErrList.list = data.data;
+                    t.monitorErrList.len = t.monitorErrList.list.length;
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        monitorErrClear: function () {
+            var t = this;
+            t.isOk = "monitorErrClear";
+            $("#isOkModal").modal("show");
+        },
+
+        monitorErrClearSubmit: function () {
+            var t = this;
+            console.log("monitorErrClearSubmit")
+            $.ajax({
+                type: "get",
+                url: t.monitorErrList.clear,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.toastShow(data.msg);
+                    t.getMonitorErrList();
+                    $("#isOkModal").modal('toggle');
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);
