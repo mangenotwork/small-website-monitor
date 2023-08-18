@@ -110,7 +110,7 @@
                                         <button type="button" class="btn btn-outline-secondary btn-sm" @click="setUriPoint(item)">
                                             <img src="/static/bootstrap/img/broadcast.svg" alt="" width="18" height="18">
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="logShow(item.ID)">
                                             <img src="/static/bootstrap/img/file-text-fill.svg" alt="" width="18" height="18">
                                         </button>
                                         <button type="button" class="btn btn-outline-secondary btn-sm">
@@ -150,7 +150,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            ...
+                           ...
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -184,6 +184,59 @@
                             <template v-if="isOk === 'monitorErrClear'">
                                 <button type="button" class="btn btn-primary" @click="monitorErrClearSubmit">是</button>
                             </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 查看监控日志 -->
+            <div class="modal modal-xl fade" id="logModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5">监控日志</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="height: 520px; overflow: auto;">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">类型</th>
+                                    <th scope="col">时间</th>
+                                    <th scope="col">站点</th>
+                                    <th scope="col">监测类型</th>
+                                    <th scope="col">监测URI</th>
+                                    <th scope="col">状态码</th>
+                                    <th scope="col">响应时间</th>
+                                    <th scope="col">Ping时间</th>
+                                    <th scope="col">对照组响应时间</th>
+                                    <th scope="col">监测结果</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <template v-for="item in monitorLog.data">
+                                    <tr>
+                                        <td>{{ item.LogType }}</td>
+                                        <td>{{ item.Time }}</td>
+                                        <td>{{ item.Host }}</td>
+                                        <td>{{ item.UriType }}</td>
+                                        <td>{{ item.Uri }}</td>
+                                        <td>{{ item.UriCode }}</td>
+                                        <td>{{ item.UriMs }} ms</td>
+                                        <td>{{ item.PingMs }} ms</td>
+                                        <td>{{ item.ContrastUriMs }} ms</td>
+                                        <td>{{ item.Msg }}</td>
+                                    </tr>
+                                </template>
+                                </tbody>
+                            </table>
+
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
                         </div>
                     </div>
                 </div>

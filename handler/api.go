@@ -382,6 +382,13 @@ func MonitorErrClear(c *ginHelper.GinCtx) {
 	return
 }
 
+func MonitorLog(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	data := business.ReadLog(hostId)
+	c.APIOutPut(data, "")
+	return
+}
+
 func Case1(c *ginHelper.GinCtx) {
 	//mLog := business.MonitorLog{
 	//	LogType:         "Info",

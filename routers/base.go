@@ -59,13 +59,12 @@ func API() {
 	api.POST("/point/add/:hostId", ginHelper.Handle(handler.WebsitePointAdd))  // 添加监测点
 	api.GET("/point/list/:hostId", ginHelper.Handle(handler.WebsitePointList)) // 获取监测点
 	api.POST("/point/del/:hostId", ginHelper.Handle(handler.WebsitePointDel))  // 删除监测点
-	api.GET("/website/info/:hostId", ginHelper.Handle(handler.WebsiteInfo))    // TODO 获取当前站点采集的URI列表
+	api.GET("/website/info/:hostId", ginHelper.Handle(handler.WebsiteInfo))    // 获取当前站点采集的URI列表
 	api.GET("/alert/list", ginHelper.Handle(handler.AlertList))                // 获取报警通知
 	api.GET("/alert/clear", ginHelper.Handle(handler.AlertClear))              // 清空报警通知
 	api.GET("/monitor/err/list", ginHelper.Handle(handler.MonitorErrList))     // 获取监控平台错误日志
 	api.GET("/monitor/err/clear", ginHelper.Handle(handler.MonitorErrClear))   // 清空监控平台错误日志
-	// TODO 更新URI列表
-	// TODO 查看日志
+	api.GET("/monitor/log/:hostId", ginHelper.Handle(handler.MonitorLog))      // 查看日志
 	// TODO 设置
 	// TODO 删除
 	// TODO 图表

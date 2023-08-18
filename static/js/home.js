@@ -70,6 +70,11 @@ const app = createApp({
                 len: 0,
             },
             isOk: "",
+            monitorLog: {
+                hostId: "",
+                api: "/api/monitor/log/",
+                data: {},
+            },
         }
     },
     created:function(){
@@ -416,6 +421,29 @@ const app = createApp({
                     if (data.code === 0) {
                         t.websiteInfo.data = data.data;
                         $("#websiteInfoModal").modal('show');
+                    } else {
+                        t.toastShow(data.msg);
+                    }
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        logShow: function (id) {
+            var t = this;
+            t.monitorLog.hostId = id;
+            $.ajax({
+                type: "get",
+                url: t.monitorLog.api+t.monitorLog.hostId,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    if (data.code === 0) {
+                        t.monitorLog.data = data.data;
+                        $("#logModal").modal('show');
                     } else {
                         t.toastShow(data.msg);
                     }

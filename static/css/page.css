@@ -245,3 +245,13 @@ body {
 }
 
 .alert {padding: 4px;}
+
+.table tr th {
+    background-color: #f0f0f0;
+}
+
+thead tr th {
+    background-color: #f0f0f0;
+    position:sticky;
+    top:0;
+}
