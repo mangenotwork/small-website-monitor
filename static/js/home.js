@@ -66,6 +66,15 @@ const app = createApp({
         t.getMailInfo();
     },
     methods: {
+
+        toastShow: function (msg) {
+            var t = this;
+            t.msg = msg;
+            const toastLiveExample = document.getElementById('liveToast')
+            const toast = new bootstrap.Toast(toastLiveExample)
+            toast.show()
+        },
+
         addWebSiteMonitor: function () {
             var t = this;
             t.addWebSite.param.rate = Number(t.addWebSite.param.rate);
@@ -82,10 +91,7 @@ const app = createApp({
                         $("#addHostModal").modal('toggle');
                         t.getList();
                     }
-                    t.msg = data.msg;
-                    const toastLiveExample = document.getElementById('liveToast')
-                    const toast = new bootstrap.Toast(toastLiveExample)
-                    toast.show()
+                    t.toastShow(data.msg);
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);
@@ -153,10 +159,7 @@ const app = createApp({
                         $("#mailSetModal").modal('toggle');
                         t.getMail();
                     }
-                    t.msg = data.msg;
-                    const toastLiveExample = document.getElementById('liveToast')
-                    const toast = new bootstrap.Toast(toastLiveExample)
-                    toast.show()
+                    t.toastShow(data.msg);
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);
@@ -198,16 +201,12 @@ const app = createApp({
                 dataType: 'json',
                 success: function(data){
                     console.log(data)
-                    t.msg = data.msg;
-                    const toastLiveExample = document.getElementById('liveToast')
-                    const toast = new bootstrap.Toast(toastLiveExample)
-                    toast.show()
+                    t.toastShow(data.msg);
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);
                 }
             });
-
         },
 
         setUriPoint: function (item) {
@@ -242,10 +241,7 @@ const app = createApp({
         addUriPoint: function () {
             var t = this;
             if (t.point.nowUri === "") {
-                t.msg = "请输入URI";
-                const toastLiveExample = document.getElementById('liveToast')
-                const toast = new bootstrap.Toast(toastLiveExample)
-                toast.show()
+                t.toastShow("请输入URI");
                 return
             }
             t.point.param.uri = t.point.hostUri + t.point.nowUri;
@@ -256,10 +252,27 @@ const app = createApp({
                 dataType: 'json',
                 success: function(data){
                     console.log(data)
-                    t.msg = data.msg;
-                    const toastLiveExample = document.getElementById('liveToast')
-                    const toast = new bootstrap.Toast(toastLiveExample)
-                    toast.show()
+                    t.toastShow(data.msg);
+                    t.getUriPoint();
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        gotoUriPoint: function (hostId, uri) {
+            var t = this;
+            t.point.hostId = hostId;
+            t.point.param.uri = uri;
+            $.ajax({
+                type: "post",
+                url: t.point.apiAdd+t.point.hostId,
+                data: JSON.stringify(t.point.param),
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.toastShow(data.msg);
                     t.getUriPoint();
                 },
                 error: function(xhr,textStatus) {
@@ -278,10 +291,7 @@ const app = createApp({
                 dataType: 'json',
                 success: function(data){
                     console.log(data)
-                    t.msg = data.msg;
-                    const toastLiveExample = document.getElementById('liveToast')
-                    const toast = new bootstrap.Toast(toastLiveExample)
-                    toast.show()
+                    t.toastShow(data.msg);
                     t.getUriPoint();
                 },
                 error: function(xhr,textStatus) {
@@ -304,22 +314,38 @@ const app = createApp({
                         t.websiteInfo.data = data.data;
                         $("#websiteInfoModal").modal('show');
                     } else {
-                        t.msg = data.msg;
-                        const toastLiveExample = document.getElementById('liveToast')
-                        const toast = new bootstrap.Toast(toastLiveExample)
-                        toast.show()
+                        t.toastShow(data.msg);
                     }
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);
                 }
             });
-        }
+        },
+
+        copy: function () {
+            var t = this;
+            var clipboard = new ClipboardJS('.copy');
+            clipboard.on('success', e => {
+                console.info('Action:', e.action);
+                console.info('Text:', e.text);
+                console.info('Trigger:', e.trigger);
+                t.toastShow("复制成功!");
+                e.clearSelection();
+            });
+            clipboard.on('error', e => {
+                console.error('error Action:', e.action);
+                console.error('error Trigger:', e.trigger);
+                t.toastShow("复制失败！请重试或者手动复制内容!");
+            });
+        },
 
     },
     computed: {
     },
     mounted:function(){
+
+
     },
 });
 

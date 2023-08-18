@@ -142,14 +142,14 @@ type WebSiteItem struct {
 func (item *WebSiteItem) Run() {
 	item.RateItem--
 	if item.RateItem <= 0 {
-		// 报警数据初始化
-		alert := &model.AlertBody{
-			Synopsis: utils.NowDate() + "监测到站点出现问题，请快速前往检查并处理!",
-			Tr:       make([]*model.AlertTd, 0),
-		}
 		// 计算频率复位
 		item.RateItem = item.Rate
 		log.Info("执行 " + item.HealthUri)
+		// 报警数据初始化
+		alert := &model.AlertBody{
+			Synopsis: "监测到" + item.Host + "站点出现问题，请快速前往检查并处理!",
+			Tr:       make([]*model.AlertTd, 0),
+		}
 		// 日志数据
 		mLog := &MonitorLog{
 			LogType:     "Info",
@@ -166,7 +166,7 @@ func (item *WebSiteItem) Run() {
 			return
 		}
 		// 请求对照组，对照组有问题不执行监测
-		if !item.Contrast(mLog) {
+		if item.Contrast(mLog) {
 			return
 		}
 		// 监测生命URI
@@ -182,7 +182,7 @@ func (item *WebSiteItem) Run() {
 				log.Info("邮件发送太频繁，保持1分钟的间隔")
 			} else {
 				global.LastSendMail = now
-				model.Send(utils.NowDate()+"监测到站点出现问题，请前往查看!", alert.Html())
+				model.Send(alert.Synopsis, alert.Html())
 			}
 		}
 	}
@@ -213,12 +213,14 @@ func (item *WebSiteItem) AlertRuleMs(nowMs int64) bool {
 
 // ContrastUri TODO 对照组 和 ping 写入配置
 var ContrastUri = "www.baidu.com"
+var ContrastTime int64 = 1000
 var Ping = "101.226.4.6"
 
 func request(url string) (int, int64) {
-	ctx, err := gt.Get(url)
+	ctx, err := gt.Get(url, gt.SetSleepMs(10, 100))
 	if err != nil {
 		log.Error(err)
+		model.SetMonitorErrInfo(url + " 请求失败err:" + err.Error())
 		return 0, 0
 	}
 	return ctx.StateCode, ctx.Ms.Milliseconds()
@@ -255,22 +257,24 @@ func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
 		mLog.Msg += fmt.Sprintf("对照组请求失败code=%d!", contrastCode)
 		model.SetMonitorErrInfo(mLog.Msg)
 	}
-	if contrastMs >= item.AlarmResTime {
+	if contrastMs >= ContrastTime {
 		contrastErr = true
-		mLog.Msg += fmt.Sprintf("请求对照组网络超时:%d!", contrastMs)
+		mLog.Msg += fmt.Sprintf("请求对照组网络超%dms 当前为%dms!", ContrastTime, contrastMs)
 		model.SetMonitorErrInfo(mLog.Msg)
 	}
 	if contrastErr {
 		mLog.LogType = LogTypeError
 		mLog.Write()
-		return false
+		return contrastErr
 	}
-	return true
+	return contrastErr
 }
 
 func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBody) bool {
 	// =================================  监测生命URI
 	log.Info("=================================  监测生命URI... ")
+	times := 0
+R:
 	healthCode, healthMs := request(item.HealthUri)
 	mLog.Uri = item.HealthUri
 	mLog.UriCode = healthCode
@@ -286,9 +290,14 @@ func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBo
 		mLog.Msg = fmt.Sprintf("请求失败，状态码:%d;", healthCode)
 	}
 	if item.AlertRuleMs(healthMs) {
+		// 如果是超时再来一次,确保监测是连续超时并非单个网络波动
+		if times == 0 {
+			times++
+			goto R
+		}
 		healthAlert = true
 		mLog.LogType = LogTypeAlert
-		mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d;", healthMs)
+		mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%dms;", healthMs)
 	}
 	if healthAlert {
 		date := utils.NowDate()
@@ -313,7 +322,9 @@ func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBo
 			Uri:  item.HealthUri,
 			Code: healthCode,
 			Ms:   healthMs,
-			Msg:  mLog.Msg,
+			NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
+				mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+			Msg: mLog.Msg,
 		})
 	}
 	if mLog.LogType == LogTypeInfo {
@@ -332,6 +343,8 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 		mLog.LogType = LogTypeInfo // 复位
 		mLog.Msg = ""              // 复位
 		randomUri := utils.RandomString(uri.AllUri)
+		times := 0
+	R:
 		randomCode, randomMs := request(randomUri)
 		mLog.Uri = randomUri
 		mLog.UriCode = randomCode
@@ -344,9 +357,13 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 			mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", randomCode)
 		}
 		if item.AlertRuleMs(randomMs) {
+			if times == 0 {
+				times++
+				goto R
+			}
 			randomAlert = true
 			mLog.LogType = LogTypeAlert
-			mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", randomMs)
+			mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%dms", randomMs)
 		}
 		if randomAlert {
 			date := utils.NowDate()
@@ -371,7 +388,9 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 				Uri:  randomUri,
 				Code: randomCode,
 				Ms:   randomMs,
-				Msg:  mLog.Msg,
+				NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
+					mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+				Msg: mLog.Msg,
 			})
 		}
 		if mLog.LogType == LogTypeInfo {
@@ -390,6 +409,8 @@ func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBod
 	hasAlert := false
 	if err == nil && len(point.Uri) > 0 {
 		for _, v := range point.Uri {
+			times := 0
+		R:
 			mLog.LogType = LogTypeInfo // 复位
 			mLog.Msg = ""              // 复位
 			pointCode, pointMs := request(v)
@@ -405,9 +426,13 @@ func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBod
 				mLog.Msg = fmt.Sprintf("请求失败，状态码:%d", pointCode)
 			}
 			if item.AlertRuleMs(pointMs) {
+				if times == 0 {
+					times++
+					goto R
+				}
 				vAlert = true
 				mLog.LogType = LogTypeAlert
-				mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%d", pointMs)
+				mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%dms", pointMs)
 			}
 			if vAlert {
 				hasAlert = true
@@ -432,7 +457,9 @@ func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBod
 					Uri:  v,
 					Code: pointCode,
 					Ms:   pointMs,
-					Msg:  mLog.Msg,
+					NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
+						mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+					Msg: mLog.Msg,
 				})
 			}
 			if mLog.LogType == LogTypeInfo {

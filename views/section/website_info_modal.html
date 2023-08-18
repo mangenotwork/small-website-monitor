@@ -26,8 +26,8 @@
                             <li class="list-group-item list-group-item-action">
                                 <span>{{ item }}</span>
                                 <a style="float: right; margin-right: 12px;" :href="item" target="_blank"><img src="/static/bootstrap/img/window.svg" alt="" width="18" height="18"></a>
-                                <a style="float: right; margin-right: 12px;"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
-                                <a style="float: right; margin-right: 12px;"><img src="/static/bootstrap/img/broadcast-pin.svg" alt="" width="18" height="18"></a>
+                                <a class="copy" style="float: right; margin-right: 12px;" :data-clipboard-text="item" @click="copy"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
+                                <a style="float: right; margin-right: 12px;" @click="gotoUriPoint(websiteInfo.data.ID, item)"><img src="/static/bootstrap/img/broadcast-pin.svg" alt="" width="18" height="18"></a>
                             </li>
                         </template>
                     </template>
@@ -44,7 +44,7 @@
                             <li class="list-group-item list-group-item-action">
                                 <span>{{ item }}</span>
                                 <a style="float: right; margin-right: 12px;" :href="item" target="_blank"><img src="/static/bootstrap/img/window.svg" alt="" width="18" height="18"></a>
-                                <a style="float: right; margin-right: 12px;"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
+                                <a style="float: right; margin-right: 12px;" @click="copyUri(item)"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
                             </li>
                         </template>
                     </template>
@@ -60,7 +60,7 @@
                             <li class="list-group-item list-group-item-action">
                                 <span>{{ item }}</span>
                                 <a style="float: right; margin-right: 12px;" :href="item" target="_blank"><img src="/static/bootstrap/img/window.svg" alt="" width="18" height="18"></a>
-                                <a style="float: right; margin-right: 12px;"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
+                                <a style="float: right; margin-right: 12px;" @click="copyUri(item)"><img src="/static/bootstrap/img/link.svg" alt="" width="18" height="18"></a>
                             </li>
                         </template>
                     </template>

@@ -72,12 +72,13 @@ type AlertBody struct {
 }
 
 type AlertTd struct {
-	Date string
-	Host string
-	Uri  string
-	Code int
-	Ms   int64
-	Msg  string
+	Date       string
+	Host       string
+	Uri        string
+	Code       int
+	Ms         int64
+	NetworkEnv string
+	Msg        string
 }
 
 func (a *AlertBody) Html() string {
@@ -85,11 +86,19 @@ func (a *AlertBody) Html() string {
 	synopsis := fmt.Sprintf("<h3>%s</h3>", a.Synopsis)
 	tr := ""
 	for _, v := range a.Tr {
-		tr += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%sms</td></tr>",
-			v.Date, v.Host, v.Uri, v.Code, v.Ms, v.Msg)
+		tr += fmt.Sprintf("<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%dms</td><td>%s</td><td>%s</td></tr>",
+			v.Date, v.Host, v.Uri, v.Code, v.Ms, v.NetworkEnv, v.Msg)
 	}
-	thead := "<thead><tr><td>监测时间</td><td>站点</td><td>链接</td><td>请求状态码</td><td>响应时间</td><td>报警信息</td></tr></thead>"
-	table := fmt.Sprintf("<table>%s<tbody>%s</tbody></table>", thead, tr)
+	thead := `<thead><tr>
+		<th width="auto">监测时间</th>
+		<th width="auto">站点</th>
+		<th width="auto">链接</th>
+		<th width="auto">请求状态码</th>
+		<th width="auto">响应时间</th>
+		<th width="auto">网络环境</th>
+		<th width="auto">报警信息</th>
+	</tr></thead>`
+	table := fmt.Sprintf(`<table border="1" cellspacing="0">%s<tbody>%s</tbody></table>`, thead, tr)
 	body = synopsis + table
 	return body
 }

@@ -308,7 +308,7 @@ func WebsiteInfo(c *ginHelper.GinCtx) {
 	websiteList := model.NewWebSiteUri(hostId)
 	_, _ = websiteList.Get()
 	data := &WebsiteInfoOut{website, websiteList}
-	c.APIOutPut(data, "删除成功")
+	c.APIOutPut(data, "")
 	return
 }
 
@@ -361,5 +361,20 @@ func Case1(c *ginHelper.GinCtx) {
 	//	log.Error(err)
 	//}
 	//c.APIOutPut(alertObj.List, "")
+	alert := &model.AlertBody{
+		Synopsis: "监测到" + "aaa" + "站点出现问题，请快速前往检查并处理!",
+		Tr:       make([]*model.AlertTd, 0),
+	}
+	alert.Tr = append(alert.Tr, &model.AlertTd{
+		Date: utils.NowDate(),
+		Host: "aaa",
+		Uri:  "httpasdasdasdasdasdasdasdasd",
+		Code: 200,
+		Ms:   1000,
+		NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
+			10, "asdasdas", 100),
+		Msg: "测试 test",
+	})
 
+	model.Send(alert.Synopsis, alert.Html())
 }
