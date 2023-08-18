@@ -8,6 +8,7 @@ replace github.com/mangenotwork/gathertool => /media/ManGe/fe3b15b2-5de5-42d6-98
 
 require (
 	github.com/boltdb/bolt v1.3.1
+	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/mangenotwork/common v0.0.0-00010101000000-000000000000
 	github.com/mangenotwork/gathertool v0.4.4

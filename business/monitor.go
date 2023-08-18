@@ -38,9 +38,6 @@ func HttpCodeIsHealth(code int) bool {
 2. 触发执行: 执行请求生命Uri + 随机监测点 + 对照组
 3. 记录结果
 
-TODO 内存缓存记录记总监测结果
-
-
 */
 
 func Monitor() {
@@ -299,6 +296,15 @@ R:
 		mLog.LogType = LogTypeAlert
 		mLog.Msg += fmt.Sprintf("响应时间超过设置的报警时间，响应时间:%dms;", healthMs)
 	}
+
+	NowMonitorSet(&NowMonitor{
+		HostId:     item.ID,
+		Code:       healthCode,
+		Ms:         healthMs,
+		ContrastMs: mLog.ContrastUriMs,
+		PingMs:     mLog.PingMs,
+	})
+
 	if healthAlert {
 		date := utils.NowDate()
 		// 记录报警

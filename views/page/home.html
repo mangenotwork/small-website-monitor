@@ -85,7 +85,9 @@
                         <th scope="col">报警</th>
                         <th scope="col">监测方式</th>
                         <th scope="col">根URI</th>
+                        <th scope="col">状态码</th>
                         <th scope="col">响应</th>
+                        <th scope="col">Ping</th>
                         <th scope="col">对照组</th>
                         <th scope="col">操作</th>
                     </tr>
@@ -94,11 +96,17 @@
                         <template v-for="item in websiteList.data.List">
                             <tr>
                                 <td><span style="font-size: 14px;"><b>{{ item.Host }}</b></span></td>
-                                <td><span class="badge text-bg-danger">11</span></td>
+                                <td>
+                                    <template v-if="AlertCount>0"><span class="badge text-bg-danger">{{AlertCount}}</span></template>
+                                    <template v-else><span class="badge text-bg-success">Passed</span></template>
+
+                                </td>
                                 <td><span style="font-size: 10px;">根URI+随机URI+监测点/{{ item.Rate }}s</span></td>
                                 <td><span style="font-size: 10px;">{{ item.HealthUri }}</span></td>
-                                <td>33ms</td>
-                                <td>12ms</td>
+                                <td>{{ item.Code }}</td>
+                                <td>{{ item.Ms }}ms</td>
+                                <td>{{ item.PingMs }}ms</td>
+                                <td>{{ item.ContrastMs }}ms</td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#setAlertModal">
@@ -140,6 +148,8 @@
             {[ template "set_uri_modal.html" . ]}
             {[ template "mail_set_modal.html" . ]}
             {[ template "website_info_modal.html" . ]}
+            {[ template "log_modal.html" ]}
+            {[ template "isok_modal.html" ]}
 
             <!-- 查看配置 -->
             <div class="modal fade" id="confModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confModalLabel" aria-hidden="true">
@@ -160,87 +170,9 @@
                 </div>
             </div>
 
-            <!-- 请确认 -->
-            <div class="modal fade" id="isOkModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5">请确认</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <template v-if="isOk === 'alertClear'">
-                                是否清空报警通知
-                            </template>
-                            <template v-if="isOk === 'monitorErrClear'">
-                                是否清空监控平台错误日志
-                            </template>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
-                            <template v-if="isOk === 'alertClear'">
-                                <button type="button" class="btn btn-primary" @click="alertClearSubmit">是</button>
-                            </template>
-                            <template v-if="isOk === 'monitorErrClear'">
-                                <button type="button" class="btn btn-primary" @click="monitorErrClearSubmit">是</button>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- 查看监控日志 -->
-            <div class="modal modal-xl fade" id="logModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5">监控日志</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div style="height: 520px; overflow: auto;">
-                            <table class="table table-hover">
-                                <thead>
-                                <tr>
-                                    <th scope="col">类型</th>
-                                    <th scope="col">时间</th>
-                                    <th scope="col">站点</th>
-                                    <th scope="col">监测类型</th>
-                                    <th scope="col">监测URI</th>
-                                    <th scope="col">状态码</th>
-                                    <th scope="col">响应时间</th>
-                                    <th scope="col">Ping时间</th>
-                                    <th scope="col">对照组响应时间</th>
-                                    <th scope="col">监测结果</th>
-                                </tr>
-                                </thead>
 
-                                <tbody>
-                                <template v-for="item in monitorLog.data">
-                                    <tr>
-                                        <td>{{ item.LogType }}</td>
-                                        <td>{{ item.Time }}</td>
-                                        <td>{{ item.Host }}</td>
-                                        <td>{{ item.UriType }}</td>
-                                        <td>{{ item.Uri }}</td>
-                                        <td>{{ item.UriCode }}</td>
-                                        <td>{{ item.UriMs }} ms</td>
-                                        <td>{{ item.PingMs }} ms</td>
-                                        <td>{{ item.ContrastUriMs }} ms</td>
-                                        <td>{{ item.Msg }}</td>
-                                    </tr>
-                                </template>
-                                </tbody>
-                            </table>
 
-                            </div>
-
-                        </div>
-                        <div class="modal-footer">
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="toast-container p-3 top-50 start-50 translate-middle">
                 <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">

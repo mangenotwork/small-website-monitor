@@ -119,9 +119,15 @@ func CaseT(c *ginHelper.GinCtx) {
 }
 
 type WebsiteListOut struct {
-	List     []*model.WebSite
+	List     []*WebsiteListData
 	Count    int
 	PageList []*ginHelper.Page
+}
+
+type WebsiteListData struct {
+	*model.WebSite
+	*business.NowMonitor
+	AlertCount int
 }
 
 func WebsiteList(c *ginHelper.GinCtx) {
@@ -132,17 +138,27 @@ func WebsiteList(c *ginHelper.GinCtx) {
 	}
 	log.Info("pg = ", pg)
 	size := 10
-
-	// TODO 聚合查询，需要将最近响应时间取出来聚合
-
-	data, count, err := new(model.WebSite).List(pg, size)
+	websiteListData := make([]*WebsiteListData, 0)
+	websiteList, count, err := new(model.WebSite).List(pg, size)
 	if err != nil {
 		c.APIOutPutError(err, "获取失败")
 		return
 	}
+	for _, v := range websiteList {
+		nowRse := business.NowMonitorGet(v.ID)
+		log.Info("nowRse = ", nowRse)
+		alert := model.NewWebSiteAlert(v.ID)
+		alertCount, err := alert.Len()
+		if err != nil {
+			log.Error(err)
+		}
+		websiteListData = append(websiteListData, &WebsiteListData{
+			v, nowRse, alertCount,
+		})
+	}
 
 	c.APIOutPut(&WebsiteListOut{
-		List:     data,
+		List:     websiteListData,
 		Count:    count,
 		PageList: c.PageList(pg, 5, count, size, ""),
 	}, "")

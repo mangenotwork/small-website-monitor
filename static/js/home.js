@@ -84,6 +84,13 @@ const app = createApp({
         t.getMailInfo();
         t.getAlertList();
         t.getMonitorErrList();
+        t.timer = window.setInterval(() => {
+            t.getList();
+        }, 10000);
+    },
+    destroyed:function () {
+        var t = this;
+        window.clearInterval(t.timer)
     },
     methods: {
 
@@ -475,8 +482,6 @@ const app = createApp({
     computed: {
     },
     mounted:function(){
-
-
     },
 });
 

@@ -100,8 +100,8 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
 				}
 				data = append(data, value)
 			}
-			count = i
 		}
+		count = i
 		return nil
 	})
 	return data, count, err

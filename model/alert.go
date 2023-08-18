@@ -40,3 +40,11 @@ func (m *WebSiteAlert) Clear() error {
 	m.List = m.List[:0]
 	return DB.Set(WebSiteAlertTable, m.HostID, m)
 }
+
+func (m *WebSiteAlert) Len() (int, error) {
+	err := m.Get()
+	if err != nil {
+		return 0, err
+	}
+	return len(m.List), nil
+}
