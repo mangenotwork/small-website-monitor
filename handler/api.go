@@ -131,12 +131,10 @@ type WebsiteListData struct {
 }
 
 func WebsiteList(c *ginHelper.GinCtx) {
-
 	pg := c.GetQueryInt("pg")
 	if pg < 1 {
 		pg = 1
 	}
-	log.Info("pg = ", pg)
 	size := 10
 	websiteListData := make([]*WebsiteListData, 0)
 	websiteList, count, err := new(model.WebSite).List(pg, size)
@@ -155,7 +153,6 @@ func WebsiteList(c *ginHelper.GinCtx) {
 			v, nowRse, alertCount,
 		})
 	}
-
 	c.APIOutPut(&WebsiteListOut{
 		List:     websiteListData,
 		Count:    count,
@@ -446,6 +443,23 @@ func WebsiteDelete(c *ginHelper.GinCtx) {
 	}
 	c.APIOutPut("", "删除成功")
 	return
+}
+
+func AlertCount(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	alert := model.NewWebSiteAlert(hostId)
+	alertCount, err := alert.Len()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut(alertCount, "")
+	return
+}
+
+// TODO WebsiteEdit
+func WebsiteEdit(c *ginHelper.GinCtx) {
+
 }
 
 func Case1(c *ginHelper.GinCtx) {

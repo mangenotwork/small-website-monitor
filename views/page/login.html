@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{[ .Title ]}</title>
-    <link href="/static/bootstrap/css/bootstrap.min.css?v=1" rel="stylesheet">
-    <link href="/static/bootstrap/css/sign-in.css" rel="stylesheet">
-</head>
-<body class="text-center">
+{[ template "__body_start_default.html" . ]}
     <main class="form-signin w-100 m-auto">
         <img class="mb-4" src="/static/bootstrap/img/stripe.svg"  alt="" width="72" height="57">
         <h2 class="h3 mb-3 fw-normal">{[ .Title ]}</h2>
@@ -29,5 +20,4 @@
             <button class="w-100 btn btn-lg btn-dark" type="submit">登录</button>
         </form>
     </main>
-</body>
-</html>
+{[ template "__body_end_default.html" . ]}

@@ -17,23 +17,35 @@ small website monitor也是一款基于gin+vue+Bootstrap5的标准实践项目�
 # 架构选型
 
 ### v1
+
 整体结构MVC
+
 后端: gin 
+
 JS: vue3, jq
+
 UI: Bootstrap_v5
 
 ### V2
+
 整体架构CS
+
 Master(MVC gin+vue3+jq+Bootstrap_v5) 管理，监测汇总等
+
 Slave 监测，采集等
 
 ### V3
+
 整体架构CS+插件
+
 CS: Master+Slave
+
 插件: 分析插件用于分析采样数据提供解决方案实现智能分析问题
+
 使用插件的目的是为了扩展，不同类型的问题分析各异，提升整体系统的可插拔性
 
 
 ### 进度计划
+- 首页 - 报警信息查看
 - 首页 - 设置
 - 首页 - 图表
