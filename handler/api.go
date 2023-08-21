@@ -146,10 +146,9 @@ func WebsiteList(c *ginHelper.GinCtx) {
 	}
 	for _, v := range websiteList {
 		nowRse := business.NowMonitorGet(v.ID)
-		log.Info("nowRse = ", nowRse)
 		alert := model.NewWebSiteAlert(v.ID)
 		alertCount, err := alert.Len()
-		if err != nil {
+		if err != nil && err != model.ISNULL {
 			log.Error(err)
 		}
 		websiteListData = append(websiteListData, &WebsiteListData{
@@ -405,69 +404,66 @@ func MonitorLog(c *ginHelper.GinCtx) {
 	return
 }
 
-func Case1(c *ginHelper.GinCtx) {
-	//mLog := business.MonitorLog{
-	//	LogType:         "Info",
-	//	Time:            utils.NowDate(),
-	//	HostId:          "1",
-	//	Host:            "test",
-	//	Uri:             "uri",
-	//	UriCode:         200,
-	//	UriMs:           100,
-	//	ContrastUri:     "ContrastUri",
-	//	ContrastUriCode: 200,
-	//	ContrastUriMs:   30,
-	//}
-	//mLog.Write()
-
-	//webSiteUri := model.NewWebSiteUri("1")
-	//webSiteUri.Collect("www.33633.cn", 2)
-	//data, err := webSiteUri.Get()
-	//if err != nil {
-	//	c.APIOutPutError(err, "")
-	//	return
-	//}
-	//c.APIOutPut(data, "")
-	//return
-	//gt.ClosePingTerminalPrint()
-	//t, err := gt.Ping("101.226.4.6")
-	//log.Info(t, err)
-
-	//date := utils.NowDate()
-	//// 记录报警
-	//alertObj := model.NewWebSiteAlert("1")
-	//err := alertObj.Add(&model.AlertData{
-	//	Date:          date,
-	//	Uri:           "test uri",
-	//	UriCode:       200,
-	//	UriMs:         100,
-	//	ContrastUriMs: 100,
-	//	PingMs:        100,
-	//	Msg:           "测试测试",
-	//})
-	//if err != nil {
-	//	log.Error("记录报警信息失败:" + err.Error())
-	//}
-	//
-	//err = alertObj.Get()
-	//if err != nil {
-	//	log.Error(err)
-	//}
-	//c.APIOutPut(alertObj.List, "")
-	alert := &model.AlertBody{
-		Synopsis: "监测到" + "aaa" + "站点出现问题，请快速前往检查并处理!",
-		Tr:       make([]*model.AlertTd, 0),
+func WebsiteDelete(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	// 确认是否存在
+	website, err := new(model.WebSite).Get(hostId)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
 	}
-	alert.Tr = append(alert.Tr, &model.AlertTd{
-		Date: utils.NowDate(),
-		Host: "aaa",
-		Uri:  "httpasdasdasdasdasdasdasdasd",
-		Code: 200,
-		Ms:   1000,
-		NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
-			10, "asdasdas", 100),
-		Msg: "测试 test",
-	})
+	if utils.AnyToInt64(website.ID) < 1 {
+		c.APIOutPutError(fmt.Errorf("站点不存在"), "站点不存在")
+		return
+	}
+	// 删除website
+	err = website.Delete(website.ID)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	// 删除Uri
+	websiteUri := model.NewWebSiteUri(hostId)
+	err = websiteUri.Delete()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	// 删除Point
+	websitePoint := model.NewWebSitePoint(hostId)
+	err = websitePoint.DeleteWebsite()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	// 更新website对象
+	business.Push()
+	// 删除日志
+	err = business.DeleteLog(website.ID)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut("", "删除成功")
+	return
+}
 
-	model.Send(alert.Synopsis, alert.Html())
+func Case1(c *ginHelper.GinCtx) {
+	id, err := model.GetIncrement()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut(id, "")
+	return
+}
+
+func Case2(c *ginHelper.GinCtx) {
+	err := model.ResetIncrement()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut("", "ok")
+	return
 }

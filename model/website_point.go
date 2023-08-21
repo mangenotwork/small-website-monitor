@@ -62,3 +62,7 @@ func (m *WebSitePoint) Random() string {
 	}
 	return utils.RandomString(m.Uri)
 }
+
+func (m *WebSitePoint) DeleteWebsite() error {
+	return DB.Delete(WebSitePointTable, m.HostID)
+}

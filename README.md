@@ -14,31 +14,26 @@ small website monitor还扩展了Mysql监测工具，SqlServer监测工具，Red
 
 small website monitor也是一款基于gin+vue+Bootstrap5的标准实践项目，简洁直观的项目结构与编码细节，供大家参考学习；
 
-# v1 基础架构
+# 架构选型
+
+### v1
 整体结构MVC
 后端: gin 
-UI: Bootstrap v5
+JS: vue3, jq
+UI: Bootstrap_v5
 
-# V2 基础架构
+### V2
 整体架构CS
-Master(MVC) 管理，监测汇总等
+Master(MVC gin+vue3+jq+Bootstrap_v5) 管理，监测汇总等
 Slave 监测，采集等
 
-# V3 基础架构
+### V3
 整体架构CS+插件
 CS: Master+Slave
 插件: 分析插件用于分析采样数据提供解决方案实现智能分析问题
 使用插件的目的是为了扩展，不同类型的问题分析各异，提升整体系统的可插拔性
 
-# 期望
-v1 : 基础公共
-V2 : 分布式监测，地域监测点
-v3 : 智能问题分析
-
-### bug 
-1. 在添加站点，自增id的取值是按排序来的，取到9永远取不到10，10排在1后面；需要添加一个表来记录自增id 
 
 ### 进度计划
-- 首页 - 删除
 - 首页 - 设置
 - 首页 - 图表

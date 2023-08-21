@@ -20,6 +20,11 @@ const app = createApp({
                 page: 1,
                 data: [],
             },
+            deleteWebsite: {
+                api: "/api/website/delete/",
+                id: "",
+                hostName: "",
+            },
             hasMail: {
                 api: "/api/mail/init",
                 data: {},
@@ -454,6 +459,34 @@ const app = createApp({
                     } else {
                         t.toastShow(data.msg);
                     }
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+
+        deleteWebsiteOpen: function (item) {
+            var t = this;
+            t.deleteWebsite.hostId = item.ID;
+            t.deleteWebsite.hostName = item.Host;
+            t.isOk = "deleteWebsite";
+            $("#isOkModal").modal("show");
+        },
+
+        deleteWebsiteSubmit: function () {
+            var t = this;
+            $.ajax({
+                type: "get",
+                url: t.deleteWebsite.api+t.deleteWebsite.hostId,
+                data: "",
+                dataType: 'json',
+                success: function(data){
+                    console.log(data)
+                    t.toastShow(data.msg);
+                    t.getMonitorErrList();
+                    $("#isOkModal").modal('toggle');
+                    t.getList();
                 },
                 error: function(xhr,textStatus) {
                     console.log(xhr, textStatus);

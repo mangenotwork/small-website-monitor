@@ -13,6 +13,9 @@
                 <template v-if="isOk === 'monitorErrClear'">
                     是否清空监控平台错误日志
                 </template>
+                <template v-if="isOk === 'deleteWebsite'">
+                    是否删除站点 {{deleteWebsite.hostName}} ?
+                </template>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">否</button>
@@ -21,6 +24,9 @@
                 </template>
                 <template v-if="isOk === 'monitorErrClear'">
                     <button type="button" class="btn btn-primary" @click="monitorErrClearSubmit">是</button>
+                </template>
+                <template v-if="isOk === 'deleteWebsite'">
+                    <button type="button" class="btn btn-primary" @click="deleteWebsiteSubmit">是</button>
                 </template>
             </div>
         </div>

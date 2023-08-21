@@ -17,12 +17,14 @@ const (
 	WebSiteAlertTable   = "website_alert_table"
 	MonitorErrInfoKey   = "MonitorErrInfo"
 	MonitorErrInfoTable = "monitor_err_info_table"
+	IncrementTable      = "increment_table"
+	IncrementKey        = "Increment"
 )
 
 var (
 	DBPath = "./data.db"
 	Tables = []string{WebSiteTable, MailTable, WebSiteURITable, WebSitePointTable,
-		WebSiteAlertTable, MonitorErrInfoTable}
+		WebSiteAlertTable, MonitorErrInfoTable, IncrementTable}
 	DB     = NewLocalDB(DBPath, Tables)
 	ISNULL = fmt.Errorf("ISNULL")
 )

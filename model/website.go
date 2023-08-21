@@ -46,20 +46,16 @@ func (m *WebSite) Add() (string, error) {
 		if b == nil {
 			return fmt.Errorf(WebSiteTable + "表不存在")
 		}
-		c := b.Cursor()
-		k, _ := c.Last()
-		var id int64 = 0
-		if len(string(k)) > 0 {
-			id = utils.AnyToInt64(string(k))
-			log.Info("kInt = ", id)
+		id, err := GetIncrement()
+		if err != nil {
+			return err
 		}
-		m.ID = utils.AnyToString(id + 1)
+		m.ID = utils.AnyToString(id)
 		value, err := utils.AnyToJsonB(m)
 		if err != nil {
 			log.Error(err)
 			return err
 		}
-		log.Info("m.ID = ", m.ID)
 		websiteId = m.ID
 		err = b.Put([]byte(m.ID), value)
 		if err != nil {
@@ -80,7 +76,6 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
 	count := 0
 	start := (pg - 1) * size
 	end := pg * size
-	log.Error("start,end = ", start, end)
 	data := make([]*WebSite, 0)
 	err := DB.Conn.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(WebSiteTable))
@@ -92,7 +87,6 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			i++
 			if i > start && i <= end {
-				fmt.Printf("key=%s, value=%s\n", k, v)
 				value := &WebSite{}
 				e := json.Unmarshal(v, value)
 				if e != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/mangenotwork/common/utils"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -59,12 +60,11 @@ func (m *MonitorLog) Write() {
 	defer func() {
 		_ = file.Close()
 	}()
-	n, err := io.WriteString(file, m.DataFormat())
+	_, err = io.WriteString(file, m.DataFormat())
 	if err != nil {
-		fmt.Println("写入错误：", err)
+		log.Error("写入日志错误：", err)
 		return
 	}
-	fmt.Println("写入成功：n=", n)
 }
 
 func (m *MonitorLog) DataFormat() string {
@@ -153,4 +153,27 @@ func toMonitorLogObj(str string) *MonitorLog {
 		PingMs:          utils.AnyToInt64(strList[12]),
 		Msg:             strList[13],
 	}
+}
+
+// DeleteLog 删除日志
+func DeleteLog(id string) error {
+	logPath, err := conf.YamlGetString("logPath")
+	if err != nil {
+		logPath = "./log/"
+	}
+	return filepath.Walk(logPath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return err
+		}
+		fileName := info.Name()
+		fid := strings.Split(fileName, "_")
+		if len(fid) > 0 && fid[0] == id {
+			log.Info("fileName = ", fileName, path)
+			err = os.Remove(path)
+			if err != nil {
+				log.Error(err)
+			}
+		}
+		return err
+	})
 }

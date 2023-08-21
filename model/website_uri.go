@@ -31,6 +31,10 @@ func (m *WebSiteUri) Get() (*WebSiteUri, error) {
 	return m, err
 }
 
+func (m *WebSiteUri) Delete() error {
+	return DB.Delete(WebSiteURITable, m.HostID)
+}
+
 func (m *WebSiteUri) Collect(rootURI string, depth int) {
 	gt.ApplicationTerminalOut = false
 	hostScan := gt.NewHostScanUrl(rootURI, depth)
