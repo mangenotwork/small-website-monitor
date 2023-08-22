@@ -103,6 +103,22 @@ const app = createApp({
                     uriDepth: 2,
                 },
                 host: "",
+            },
+            chartData: {
+                hostId: "",
+                api: function () {
+                  return "/api/website/chart/" + this.hostId + "?day=" + this.selectDay + "&uri=" + this.selectUriType;
+                },
+                dayApi: function () {
+                  return "/api/log/list/" + this.hostId;
+                },
+                list: [],
+                host: "",
+                selectDay: "",
+                selectUriType: "",
+                dayList: [],
+                uriType: [{name:"健康监测",value:"Health"}, {name:"随机抽查",value:"Random"},{name:"指定监测点",value:"Point"}],
+                uriTypeName: {"Health":"健康监测", "Random":"随机抽查", "Point":"指定监测点"},
             }
         }
     },
@@ -113,10 +129,6 @@ const app = createApp({
         t.getMailInfo();
         t.getAlertList();
         t.getMonitorErrList();
-        t.$nextTick(() => {
-            t.DrawChart();
-            }
-        );
         t.timer = window.setInterval(() => {
             t.getList();
         }, 10000);
@@ -139,6 +151,21 @@ const app = createApp({
                 url: url,
                 data: "",
                 dataType: 'json',
+                success: function(data){
+                    func(data);
+                },
+                error: function(xhr,textStatus) {
+                    console.log(xhr, textStatus);
+                }
+            });
+        },
+        getNotAsync: function (url, func) {
+            $.ajax({
+                type: "get",
+                url: url,
+                data: "",
+                dataType: 'json',
+                async: false,
                 success: function(data){
                     func(data);
                 },
@@ -384,23 +411,33 @@ const app = createApp({
                 t.toastShow("复制失败！请重试或者手动复制内容!");
             });
         },
-        openChart: function (){
+        openChart: function (item){
+            let t = this;
+            t.chartData.hostId = item.ID;
+            t.chartData.host = item.Host;
+            t.chartData.selectUriType = t.chartData.uriType[0].value;
+            t.getNotAsync(t.chartData.dayApi(), function (data) {
+                t.chartData.dayList = data.data.DayList;
+                t.chartData.selectDay = t.chartData.dayList[0];
+            });
+            t.$nextTick(() => {
+                    t.DrawChart();
+                }
+            );
             $("#chartModal").modal("show");
         },
+        loadingChart: function () {
+            let t = this;
+            t.$nextTick(() => {
+                    t.DrawChart();
+                }
+            );
+        },
         DrawChart: function () {
-            // let base = +new Date(1988, 9, 3);
-            //
-            // let oneDay = 24 * 3600 * 1000;
-            // let data = [[base, Math.random() * 300]];
-            // for (let i = 1; i < 20000; i++) {
-            //     let now = new Date((base += oneDay));
-            //     data.push([+now, Math.round((Math.random() - 0.5) * 20 + data[i - 1][1])]);
-            // }
-            //
-            // console.log(data)
-
-            let data = [[619632000000, 125],[619718400000, 245],[619804800000, 268],[619891200000, 133],]
-
+            let t = this;
+            t.getNotAsync(t.chartData.api(), function (data) {
+                t.chartData.list = data.data;
+            });
             option = {
                 tooltip: {
                     trigger: 'axis',
@@ -410,14 +447,10 @@ const app = createApp({
                 },
                 title: {
                     left: 'center',
-                    text: '站点: www.33633.cn'
+                    text: t.chartData.host+"[" + t.chartData.uriTypeName[t.chartData.selectUriType] + "]",
                 },
                 toolbox: {
                     feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
                         saveAsImage: {}
                     }
                 },
@@ -432,22 +465,22 @@ const app = createApp({
                 dataZoom: [
                     {
                         type: 'inside',
-                        start: 60,
+                        start: 0,
                         end: 100
                     },
                     {
-                        start: 60,
+                        start: 0,
                         end: 100
                     }
                 ],
                 series: [
                     {
-                        name: 'Fake Data',
+                        name: '响应时间(ms)',
                         type: 'line',
                         smooth: true,
                         symbol: 'none',
                         areaStyle: {},
-                        data: data
+                        data: t.chartData.list
                     }
                 ]
             };

@@ -1,6 +1,7 @@
 package business
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/mangenotwork/common/conf"
 	"github.com/mangenotwork/common/log"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"small-website-monitor/global"
 	"strings"
 )
 
@@ -48,7 +50,7 @@ func (m *MonitorLog) Write() {
 	if err != nil {
 		logPath = "./log/"
 	}
-	fileName := logPath + m.HostId + "_" + utils.NowDateLayout("20060102") + ".log"
+	fileName := logPath + m.HostId + "_" + utils.NowDateLayout(global.DayLayout) + ".log"
 	log.Info("fileName = ", fileName)
 	var file *os.File
 	if !utils.Exists(fileName) {
@@ -78,7 +80,7 @@ func ReadLog(hostId string) []*MonitorLog {
 	if err != nil {
 		logPath = "./log/"
 	}
-	fileName := logPath + hostId + "_" + utils.NowDateLayout("20060102") + ".log"
+	fileName := logPath + hostId + "_" + utils.NowDateLayout(global.DayLayout) + ".log"
 	log.Info("fileName = ", fileName)
 	f, err := os.Open(fileName)
 	if err != nil {
@@ -176,4 +178,57 @@ func DeleteLog(id string) error {
 		}
 		return err
 	})
+}
+
+func ReadAll(id, day string) ([]*MonitorLog, error) {
+	logPath, err := conf.YamlGetString("logPath")
+	if err != nil {
+		logPath = "./log/"
+	}
+	filePath := logPath + id + "_" + day + ".log"
+	data := make([]*MonitorLog, 0)
+	log.Info("filePath = ", filePath)
+	f, err := os.Open(filePath)
+	if err != nil {
+		return data, err
+	}
+	r := bufio.NewReader(f)
+	for {
+		line, e := r.ReadBytes('\n')
+		if e == nil {
+			d := toMonitorLogObj(string(line))
+			if d != nil {
+				data = append(data, d)
+			}
+		}
+		if e != nil && e != io.EOF {
+			log.Error(e)
+			err = e
+		}
+		if e == io.EOF {
+			break
+		}
+	}
+	return data, err
+}
+
+func LogList(hostId string) ([]string, error) {
+	logPath, err := conf.YamlGetString("logPath")
+	if err != nil {
+		logPath = "./log/"
+	}
+	list := make([]string, 0)
+	err = filepath.Walk(logPath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return err
+		}
+		fileName := info.Name()
+		fid := strings.Split(fileName, "_")
+		if len(fid) > 0 && fid[0] == hostId {
+			log.Info("fileName = ", fileName, path)
+			list = append(list, fileName)
+		}
+		return err
+	})
+	return list, err
 }

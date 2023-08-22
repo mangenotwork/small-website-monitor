@@ -101,7 +101,7 @@
                                         <button type="button" class="btn btn-outline-secondary btn-sm" @click="logShow(item.ID)">
                                             <img src="/static/bootstrap/img/file-text-fill.svg" alt="" width="18" height="18">
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="openChart()">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="openChart(item)">
                                             <img src="/static/bootstrap/img/graph-up.svg" alt="" width="18" height="18">
                                         </button>
                                         <button type="button" class="btn btn-outline-secondary btn-sm" @click="deleteWebsiteOpen(item)">
@@ -161,8 +161,30 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
+
                             <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
-                            <div id="myChart" style="margin:auto;width: 720px;height: 460px;"></div>
+                            <div id="myChart" style="margin:auto;width: 720px;height: 420px;"></div>
+                            <hr>
+                            <div class="row">
+                                <div class="col">
+                                    <label class="form-label">筛选日期</label>
+                                    <select class="form-select" v-model="chartData.selectDay">
+                                        <template v-for="item in chartData.dayList">
+                                            <option v-bind:value="item">{{ item }}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="form-label">筛选监控类型</label>
+                                    <select class="form-select" v-model="chartData.selectUriType">
+                                        <template v-for="item in chartData.uriType">
+                                            <option v-bind:value="item.value">{{ item.name }}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <br>
+                            <button type="button" class="btn btn-secondary" @click="loadingChart()">加载图表</button>
                         </div>
                         <div class="modal-footer">
                         </div>

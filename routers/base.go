@@ -56,6 +56,8 @@ func API() {
 	api.GET("/website/list", ginHelper.Handle(handler.WebsiteList))             //
 	api.GET("/website/delete/:hostId", ginHelper.Handle(handler.WebsiteDelete)) //
 	api.POST("/website/edit", ginHelper.Handle(handler.WebsiteEdit))            // 监测设置
+	api.GET("/website/chart/:hostId", ginHelper.Handle(handler.WebsiteChart))   // 图表
+	api.GET("/log/list/:hostId", ginHelper.Handle(handler.WebsiteLogList))      // 日志列表
 	api.GET("/mail/init", ginHelper.Handle(handler.MailInit))                   // 是否设置邮件
 	api.POST("/mail/conf", ginHelper.Handle(handler.MailConf))                  // 设置邮件配置
 	api.GET("/mail/info", ginHelper.Handle(handler.MailInfo))                   // 获取邮件配置信息
@@ -70,8 +72,6 @@ func API() {
 	api.GET("/monitor/err/clear", ginHelper.Handle(handler.MonitorErrClear))    // 清空监控平台错误日志
 	api.GET("/monitor/log/:hostId", ginHelper.Handle(handler.MonitorLog))       // 查看日志
 	api.GET("/alert/count/:hostId", ginHelper.Handle(handler.AlertCount))       // 获取报警通知数量
-	// TODO 删除
-	// TODO 图表
 
 	// 测试
 	api.GET("/test/case1", ginHelper.Handle(handler.Case1))

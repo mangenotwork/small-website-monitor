@@ -499,6 +499,61 @@ func WebsiteEdit(c *ginHelper.GinCtx) {
 	return
 }
 
+func WebsiteChart(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	day := c.GetQuery("day")
+	if len(day) < 1 {
+		day = utils.NowDateLayout(global.DayLayout)
+	}
+	uri := c.GetQuery("uri")
+	data, err := business.ReadAll(hostId, day)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	out := make([][]int64, 0)
+	for _, v := range data {
+		if v.UriType == uri {
+			item := make([]int64, 0)
+			item = append(item, utils.Date2Timestamp(v.Time)*1000)
+			item = append(item, v.UriMs)
+			out = append(out, item)
+		}
+	}
+	c.APIOutPut(out, "")
+	return
+}
+
+type WebsiteLogListOut struct {
+	FileList []string
+	DayList  []string
+}
+
+func WebsiteLogList(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	data, err := business.LogList(hostId)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	sort.Slice(data, func(i, j int) bool {
+		return data[i] > data[j]
+	})
+	day := make([]string, 0)
+	for _, v := range data {
+		d := strings.Split(v, "_")
+		if len(d) == 2 {
+			day = append(day, strings.Replace(d[1], ".log", "", -1))
+		}
+	}
+	out := &WebsiteLogListOut{
+		FileList: data,
+		DayList:  day,
+	}
+	c.APIOutPut(out, "")
+	return
+}
+
 func Case1(c *ginHelper.GinCtx) {
 	id, err := model.GetIncrement()
 	if err != nil {
