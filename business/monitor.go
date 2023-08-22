@@ -55,7 +55,7 @@ func Monitor() {
 				// 获取站点对象
 				WebSiteObj.Range(func(key any, value any) bool {
 					web := value.(*WebSiteItem)
-					go web.Run()
+					web.Run() // 不要使用并发，影响当前网络环境
 					return true
 				})
 				timer.Reset(time.Second * 1)

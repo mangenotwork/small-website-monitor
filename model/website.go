@@ -109,8 +109,8 @@ func (m *WebSite) Get(k string) (*WebSite, error) {
 }
 
 // Update 更新数据
-func (m *WebSite) Update(k string) error {
-	return DB.Set(WebSiteTable, k, m)
+func (m *WebSite) Update() error {
+	return DB.Set(WebSiteTable, m.ID, m)
 }
 
 // Delete 删除数据

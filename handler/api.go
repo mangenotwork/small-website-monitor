@@ -60,7 +60,7 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 	param := &WebsiteAddParam{}
 	err := c.GetPostArgs(param)
 	if err != nil {
-		c.APIOutPutError(err, err.Error())
+		c.APIOutPutError(err, "参数或参数类型错误")
 		return
 	}
 	if len(param.Host) < 1 {
@@ -95,13 +95,11 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 		HostIP:        ctx.Req.RemoteAddr,
 		Created:       time.Now().Unix(),
 	}
-	log.Info(website)
 	websiteId, err := website.Add()
 	if err != nil {
 		c.APIOutPutError(err, "保存数据失败")
 		return
 	}
-
 	go func() {
 		// 更新站点对象
 		business.Push()
@@ -109,7 +107,6 @@ func WebsiteAdd(c *ginHelper.GinCtx) {
 		webSiteUri := model.NewWebSiteUri(websiteId)
 		webSiteUri.Collect(website.HealthUri, int(website.UriDepth))
 	}()
-
 	c.APIOutPut("", "添加成功")
 	return
 }
@@ -257,7 +254,7 @@ func WebsitePointAdd(c *ginHelper.GinCtx) {
 	param := &WebsitePointParam{}
 	err := c.GetPostArgs(param)
 	if err != nil {
-		c.APIOutPutError(err, err.Error())
+		c.APIOutPutError(err, "参数或参数类型错误")
 		return
 	}
 	ctx, _ := gt.Get(param.Uri)
@@ -277,7 +274,6 @@ func WebsitePointAdd(c *ginHelper.GinCtx) {
 
 func WebsitePointList(c *ginHelper.GinCtx) {
 	hostId := c.Param("hostId")
-	log.Info("hostId = ", hostId)
 	websitePoint := model.NewWebSitePoint(hostId)
 	err := websitePoint.Get()
 	if err != nil {
@@ -293,7 +289,7 @@ func WebsitePointDel(c *ginHelper.GinCtx) {
 	param := &WebsitePointParam{}
 	err := c.GetPostArgs(param)
 	if err != nil {
-		c.APIOutPutError(err, err.Error())
+		c.APIOutPutError(err, "参数或参数类型错误")
 		return
 	}
 	websitePoint := model.NewWebSitePoint(hostId)
@@ -457,9 +453,50 @@ func AlertCount(c *ginHelper.GinCtx) {
 	return
 }
 
-// TODO WebsiteEdit
-func WebsiteEdit(c *ginHelper.GinCtx) {
+type WebsiteEditParam struct {
+	HostId       string `json:"hostId"`
+	Rate         int64  `json:"rate"`
+	AlarmResTime int64  `json:"alarmResTime"`
+	UriDepth     int64  `json:"uriDepth"`
+}
 
+func WebsiteEdit(c *ginHelper.GinCtx) {
+	param := &WebsiteEditParam{}
+	err := c.GetPostArgs(param)
+	if err != nil {
+		c.APIOutPutError(err, "参数或参数类型错误")
+		return
+	}
+	if param.Rate < 1 {
+		c.APIOutPutError(nil, "监测频率不能小于1秒")
+		return
+	}
+	if param.UriDepth < 1 {
+		c.APIOutPutError(nil, "采集URI深度不能小于1层")
+		return
+	}
+	if param.AlarmResTime < 1 {
+		c.APIOutPutError(nil, "报警时间不能小于1ms")
+		return
+	}
+	// 更新设置
+	website, err := new(model.WebSite).Get(param.HostId)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	website.Rate = param.Rate
+	website.UriDepth = param.UriDepth
+	website.AlarmResTime = param.AlarmResTime
+	err = website.Update()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	// 重置对象
+	business.Push()
+	c.APIOutPut("", "设置成功")
+	return
 }
 
 func Case1(c *ginHelper.GinCtx) {

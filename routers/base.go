@@ -55,7 +55,7 @@ func API() {
 	api.POST("/website/add", ginHelper.Handle(handler.WebsiteAdd))
 	api.GET("/website/list", ginHelper.Handle(handler.WebsiteList))             //
 	api.GET("/website/delete/:hostId", ginHelper.Handle(handler.WebsiteDelete)) //
-	api.GET("/website/edit/:hostId", ginHelper.Handle(handler.WebsiteEdit))     // TODO 设置
+	api.POST("/website/edit", ginHelper.Handle(handler.WebsiteEdit))            // 监测设置
 	api.GET("/mail/init", ginHelper.Handle(handler.MailInit))                   // 是否设置邮件
 	api.POST("/mail/conf", ginHelper.Handle(handler.MailConf))                  // 设置邮件配置
 	api.GET("/mail/info", ginHelper.Handle(handler.MailInfo))                   // 获取邮件配置信息

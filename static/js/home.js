@@ -94,6 +94,16 @@ const app = createApp({
                 },
                 data: {},
             },
+            editWebsiteConf: {
+                api: "/api/website/edit",
+                param: {
+                    hostId: "",
+                    rate: 10,
+                    alarmResTime: 3000,
+                    uriDepth: 2,
+                },
+                host: "",
+            }
         }
     },
     created:function(){
@@ -103,6 +113,10 @@ const app = createApp({
         t.getMailInfo();
         t.getAlertList();
         t.getMonitorErrList();
+        t.$nextTick(() => {
+            t.DrawChart();
+            }
+        );
         t.timer = window.setInterval(() => {
             t.getList();
         }, 10000);
@@ -338,6 +352,27 @@ const app = createApp({
                 t.getList();
             });
         },
+        openEditWebsiteConf: function (item) {
+            let t = this;
+            t.editWebsiteConf.host = item.Host;
+            t.editWebsiteConf.param.hostId = item.ID;
+            t.editWebsiteConf.param.rate = item.Rate;
+            t.editWebsiteConf.param.alarmResTime = item.AlarmResTime;
+            t.editWebsiteConf.param.uriDepth = item.UriDepth;
+            console.log(item)
+            console.log(t.editWebsiteConf)
+            $("#setAlertModal").modal("show");
+        },
+        editWebsiteConfSubmit: function () {
+            let t = this;
+            t.editWebsiteConf.param.rate = Number(t.editWebsiteConf.param.rate);
+            t.editWebsiteConf.param.alarmResTime = Number(t.editWebsiteConf.param.alarmResTime);
+            t.editWebsiteConf.param.uriDepth = Number(t.editWebsiteConf.param.uriDepth);
+            t.post(t.editWebsiteConf.api, t.editWebsiteConf.param, function (data){
+                t.toastShow(data.msg);
+                $("#setAlertModal").modal('toggle');
+            })
+        },
         copy: function () {
             let t = this;
             let clipboard = new ClipboardJS('.copy');
@@ -348,6 +383,80 @@ const app = createApp({
             clipboard.on('error', e => {
                 t.toastShow("复制失败！请重试或者手动复制内容!");
             });
+        },
+        openChart: function (){
+            $("#chartModal").modal("show");
+        },
+        DrawChart: function () {
+            // let base = +new Date(1988, 9, 3);
+            //
+            // let oneDay = 24 * 3600 * 1000;
+            // let data = [[base, Math.random() * 300]];
+            // for (let i = 1; i < 20000; i++) {
+            //     let now = new Date((base += oneDay));
+            //     data.push([+now, Math.round((Math.random() - 0.5) * 20 + data[i - 1][1])]);
+            // }
+            //
+            // console.log(data)
+
+            let data = [[619632000000, 125],[619718400000, 245],[619804800000, 268],[619891200000, 133],]
+
+            option = {
+                tooltip: {
+                    trigger: 'axis',
+                    position: function (pt) {
+                        return [pt[0], '10%'];
+                    }
+                },
+                title: {
+                    left: 'center',
+                    text: '站点: www.33633.cn'
+                },
+                toolbox: {
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: 'none'
+                        },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'time',
+                    boundaryGap: false
+                },
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, '100%']
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 60,
+                        end: 100
+                    },
+                    {
+                        start: 60,
+                        end: 100
+                    }
+                ],
+                series: [
+                    {
+                        name: 'Fake Data',
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        areaStyle: {},
+                        data: data
+                    }
+                ]
+            };
+            let myChart = echarts.init(document.getElementById('myChart'), '', {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
         },
     },
     computed: {
