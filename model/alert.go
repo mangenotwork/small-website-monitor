@@ -48,3 +48,7 @@ func (m *WebSiteAlert) Len() (int, error) {
 	}
 	return len(m.List), nil
 }
+
+func (m *WebSiteAlert) Update() error {
+	return DB.Set(WebSiteAlertTable, m.HostID, m)
+}

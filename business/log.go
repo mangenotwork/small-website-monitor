@@ -192,6 +192,9 @@ func ReadAll(id, day string) ([]*MonitorLog, error) {
 	if err != nil {
 		return data, err
 	}
+	defer func() {
+		_ = f.Close()
+	}()
 	r := bufio.NewReader(f)
 	for {
 		line, e := r.ReadBytes('\n')
@@ -231,4 +234,16 @@ func LogList(hostId string) ([]string, error) {
 		return err
 	})
 	return list, err
+}
+
+func Upload(hostId, day string) (string, error) {
+	logPath, err := conf.YamlGetString("logPath")
+	if err != nil {
+		logPath = "./log/"
+	}
+	filePath := logPath + hostId + "_" + day + ".log"
+	if utils.Exists(filePath) {
+		return filePath, nil
+	}
+	return "", fmt.Errorf("日志不存在")
 }

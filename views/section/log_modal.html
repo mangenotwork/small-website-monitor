@@ -7,7 +7,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="input-group mb-3">
+                    <select class="form-select" v-model="monitorLog.log">
+                        <template v-for="item in monitorLog.logList">
+                            <option v-bind:value="item">{{ item }}</option>
+                        </template>
+                    </select>
+                    <label class="input-group-text" @click="uploadLog()">下载日志</label>
+                </div>
+                <hr>
                 <div style="height: 520px; overflow: auto;">
+                    当前日志:
                     <table class="table table-hover">
                         <thead>
                         <tr>

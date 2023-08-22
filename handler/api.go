@@ -524,6 +524,44 @@ func WebsiteChart(c *ginHelper.GinCtx) {
 	return
 }
 
+func WebsiteAlertList(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	alert := model.NewWebSiteAlert(hostId)
+	err := alert.Get()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut(alert.List, "")
+	return
+}
+
+func WebsiteAlertDel(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	date := c.GetQuery("date")
+	alert := model.NewWebSiteAlert(hostId)
+	err := alert.Get()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	log.Info("date = ", date)
+	for n, v := range alert.List {
+		if v.Date == date {
+			log.Info("删除.....")
+			alert.List = append(alert.List[:n], alert.List[n+1:]...)
+			break
+		}
+	}
+	err = alert.Update()
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.APIOutPut(hostId, "成功")
+	return
+}
+
 type WebsiteLogListOut struct {
 	FileList []string
 	DayList  []string
@@ -551,6 +589,21 @@ func WebsiteLogList(c *ginHelper.GinCtx) {
 		DayList:  day,
 	}
 	c.APIOutPut(out, "")
+	return
+}
+
+func WebsiteLogUpload(c *ginHelper.GinCtx) {
+	hostId := c.Param("hostId")
+	day := c.GetQuery("day")
+	logPath, err := business.Upload(hostId, day)
+	if err != nil {
+		c.APIOutPutError(err, err.Error())
+		return
+	}
+	c.Writer.Header().Add("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s", fmt.Sprintf("%s.log", day)))
+	c.Writer.Header().Add("Content-Type", "application/text/plain")
+	c.File(logPath)
 	return
 }
 

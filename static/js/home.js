@@ -92,7 +92,15 @@ const app = createApp({
                 api: function (){
                     return "/api/monitor/log/" + this.hostId;
                 },
+                logListApi: function () {
+                    return "/api/log/list/" + this.hostId;
+                },
+                logUpload: function () {
+                    return "/api/log/upload/" + this.hostId +"?day=" + this.log;
+                },
                 data: {},
+                logList: [],
+                log: "",
             },
             editWebsiteConf: {
                 api: "/api/website/edit",
@@ -119,6 +127,17 @@ const app = createApp({
                 dayList: [],
                 uriType: [{name:"健康监测",value:"Health"}, {name:"随机抽查",value:"Random"},{name:"指定监测点",value:"Point"}],
                 uriTypeName: {"Health":"健康监测", "Random":"随机抽查", "Point":"指定监测点"},
+            },
+            websiteAlert: {
+                hostId: "",
+                api: function () {
+                    return "/api/website/alert/" + this.hostId;
+                },
+                list: [],
+                len: 0,
+                del: function (date) {
+                    return "/api/website/alert/del/" + this.hostId + "?date="+date;
+                }
             }
         }
     },
@@ -354,6 +373,10 @@ const app = createApp({
         logShow: function (id) {
             let t = this;
             t.monitorLog.hostId = id;
+            t.getNotAsync(t.monitorLog.logListApi(), function (data){
+                t.monitorLog.logList = data.data.DayList;
+                t.monitorLog.log = t.monitorLog.logList[0];
+            })
             t.get(t.monitorLog.api(), function (data){
                 if (data.code === 0) {
                     t.monitorLog.data = data.data;
@@ -362,6 +385,10 @@ const app = createApp({
                     t.toastShow(data.msg);
                 }
             });
+        },
+        uploadLog: function () {
+            let t = this;
+            window.location = t.monitorLog.logUpload();
         },
         deleteWebsiteOpen: function (item) {
             let t = this;
@@ -491,6 +518,24 @@ const app = createApp({
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
         },
+        openAlert: function (id) {
+            let t = this;
+            t.websiteAlert.hostId = id;
+            t.get(t.websiteAlert.api(), function (data){
+               t.websiteAlert.list = data.data;
+               t.websiteAlert.len = t.websiteAlert.list.length;
+            });
+            $("#alertModal").modal("show");
+        },
+        delAlert: function (date) {
+            let t = this;
+            t.get(t.websiteAlert.del(date), function (data) {
+                t.toastShow(data.msg);
+                if (data.code === 0) {
+                    t.openAlert(data.data);
+                }
+            });
+        }
     },
     computed: {
     },

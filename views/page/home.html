@@ -76,9 +76,11 @@
                     <tbody>
                         <template v-for="item in websiteList.data.List">
                             <tr>
-                                <td><span style="font-size: 14px;"><b>{{ item.Host }}</b></span></td>
+                                <td><a @click="openAlert(item.ID)"><span style="font-size: 14px;"><b>{{ item.Host }}</b></span></a></td>
                                 <td>
-                                    <template v-if="item.AlertCount>0"><span class="badge text-bg-danger">报警: {{ item.AlertCount }}</span></template>
+                                    <template v-if="item.AlertCount>0">
+                                        <a @click="openAlert(item.ID)"><span class="badge text-bg-danger">报警: {{ item.AlertCount }}</span></a>
+                                    </template>
                                     <template v-else><span class="badge text-bg-success">Passed</span></template>
                                 </td>
                                 <td><span style="font-size: 10px;">根URI+随机URI+监测点/{{ item.Rate }}s</span></td>
@@ -129,6 +131,8 @@
             {[ template "website_info_modal.html" . ]}
             {[ template "log_modal.html" ]}
             {[ template "isok_modal.html" ]}
+            {[ template "chart_modal.html" ]}
+            {[ template "alert_modal.html" ]}
 
             <!-- 查看配置 -->
             <div class="modal fade" id="confModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confModalLabel" aria-hidden="true">
@@ -147,46 +151,6 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                             <button type="button" class="btn btn-primary">提交</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 图表 -->
-            <div class="modal modal-lg fade" id="chartModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" >图表</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-
-                            <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
-                            <div id="myChart" style="margin:auto;width: 720px;height: 420px;"></div>
-                            <hr>
-                            <div class="row">
-                                <div class="col">
-                                    <label class="form-label">筛选日期</label>
-                                    <select class="form-select" v-model="chartData.selectDay">
-                                        <template v-for="item in chartData.dayList">
-                                            <option v-bind:value="item">{{ item }}</option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div class="col">
-                                    <label class="form-label">筛选监控类型</label>
-                                    <select class="form-select" v-model="chartData.selectUriType">
-                                        <template v-for="item in chartData.uriType">
-                                            <option v-bind:value="item.value">{{ item.name }}</option>
-                                        </template>
-                                    </select>
-                                </div>
-                            </div>
-                            <br>
-                            <button type="button" class="btn btn-secondary" @click="loadingChart()">加载图表</button>
-                        </div>
-                        <div class="modal-footer">
                         </div>
                     </div>
                 </div>
