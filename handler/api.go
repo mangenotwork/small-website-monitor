@@ -12,6 +12,7 @@ import (
 	"small-website-monitor/business"
 	"small-website-monitor/global"
 	"small-website-monitor/model"
+	"small-website-monitor/slave"
 	"sort"
 	"strings"
 	"time"
@@ -128,13 +129,8 @@ type WebsiteListData struct {
 }
 
 func WebsiteList(c *ginHelper.GinCtx) {
-	pg := c.GetQueryInt("pg")
-	if pg < 1 {
-		pg = 1
-	}
-	size := 10
 	websiteListData := make([]*WebsiteListData, 0)
-	websiteList, count, err := new(model.WebSite).List(pg, size)
+	websiteList, count, err := new(model.WebSite).List()
 	if err != nil {
 		c.APIOutPutError(err, "获取失败")
 		return
@@ -151,9 +147,8 @@ func WebsiteList(c *ginHelper.GinCtx) {
 		})
 	}
 	c.APIOutPut(&WebsiteListOut{
-		List:     websiteListData,
-		Count:    count,
-		PageList: c.PageList(pg, 5, count, size, ""),
+		List:  websiteListData,
+		Count: count,
 	}, "")
 	return
 }
@@ -302,8 +297,13 @@ func WebsitePointDel(c *ginHelper.GinCtx) {
 	return
 }
 
+type WebsiteAdditive struct {
+	IPAddress string
+}
+
 type WebsiteInfoOut struct {
 	*model.WebSite
+	*WebsiteAdditive
 	*model.WebSiteUri
 }
 
@@ -316,7 +316,10 @@ func WebsiteInfo(c *ginHelper.GinCtx) {
 	}
 	websiteList := model.NewWebSiteUri(hostId)
 	_, _ = websiteList.Get()
-	data := &WebsiteInfoOut{website, websiteList}
+	data := &WebsiteInfoOut{
+		website,
+		&WebsiteAdditive{model.GetIP(website.HostIP)},
+		websiteList}
 	c.APIOutPut(data, "")
 	return
 }
@@ -607,13 +610,26 @@ func WebsiteLogUpload(c *ginHelper.GinCtx) {
 	return
 }
 
-func Case1(c *ginHelper.GinCtx) {
-	id, err := model.GetIncrement()
-	if err != nil {
-		c.APIOutPutError(err, err.Error())
-		return
+type MonitorSlaveInfoOut struct {
+	Conf *model.MasterConf `json:"conf"`
+	Info *slave.SlaveInfo  `json:"info"`
+	Mail *model.MailData   `json:"mail"`
+}
+
+func MonitorSlaveInfo(c *ginHelper.GinCtx) {
+	mail, _ := model.GetMail()
+	info := &MonitorSlaveInfoOut{
+		Conf: model.GetMasterConf(),
+		Info: slave.GetSlaveInfo(),
+		Mail: mail,
 	}
-	c.APIOutPut(id, "")
+	c.APIOutPut(info, "")
+	return
+}
+
+func Case1(c *ginHelper.GinCtx) {
+	ip := model.GetNativeIP()
+	c.APIOutPut(ip, "")
 	return
 }
 

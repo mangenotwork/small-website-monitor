@@ -43,7 +43,7 @@ func Page() {
 	pg := Router.Group("")
 	pg.Use(AuthPG())
 	pg.GET("/home", handler.HomePage)
-	// TODO 监测器
+	pg.GET("/monitor", handler.MonitorPage)
 	// TODO 工具
 	// TODO 使用说明
 }
@@ -55,6 +55,7 @@ func API() {
 	api.POST("/website/add", ginHelper.Handle(handler.WebsiteAdd))
 	api.GET("/website/list", ginHelper.Handle(handler.WebsiteList))                  //
 	api.GET("/website/delete/:hostId", ginHelper.Handle(handler.WebsiteDelete))      //
+	api.GET("/website/info/:hostId", ginHelper.Handle(handler.WebsiteInfo))          // 获取当前站点采集的URI列表
 	api.POST("/website/edit", ginHelper.Handle(handler.WebsiteEdit))                 // 监测设置
 	api.GET("/website/chart/:hostId", ginHelper.Handle(handler.WebsiteChart))        // 图表
 	api.GET("/website/alert/:hostId", ginHelper.Handle(handler.WebsiteAlertList))    // 报警信息
@@ -68,13 +69,13 @@ func API() {
 	api.POST("/point/add/:hostId", ginHelper.Handle(handler.WebsitePointAdd))        // 添加监测点
 	api.GET("/point/list/:hostId", ginHelper.Handle(handler.WebsitePointList))       // 获取监测点
 	api.POST("/point/del/:hostId", ginHelper.Handle(handler.WebsitePointDel))        // 删除监测点
-	api.GET("/website/info/:hostId", ginHelper.Handle(handler.WebsiteInfo))          // 获取当前站点采集的URI列表
 	api.GET("/alert/list", ginHelper.Handle(handler.AlertList))                      // 获取报警通知
 	api.GET("/alert/clear", ginHelper.Handle(handler.AlertClear))                    // 清空报警通知
 	api.GET("/monitor/err/list", ginHelper.Handle(handler.MonitorErrList))           // 获取监控平台错误日志
 	api.GET("/monitor/err/clear", ginHelper.Handle(handler.MonitorErrClear))         // 清空监控平台错误日志
 	api.GET("/monitor/log/:hostId", ginHelper.Handle(handler.MonitorLog))            // 查看日志
 	api.GET("/alert/count/:hostId", ginHelper.Handle(handler.AlertCount))            // 获取报警通知数量
+	api.GET("/slave/info", ginHelper.Handle(handler.MonitorSlaveInfo))               // 获取平台端系统信息
 
 	// 测试
 	api.GET("/test/case1", ginHelper.Handle(handler.Case1))

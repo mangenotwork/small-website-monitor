@@ -19,12 +19,15 @@ const (
 	MonitorErrInfoTable = "monitor_err_info_table"
 	IncrementTable      = "increment_table"
 	IncrementKey        = "Increment"
+	IPTable             = "ip_table"
+	MasterConfTable     = "master_conf_table"
+	MasterConfKey       = "master_conf"
 )
 
 var (
 	DBPath = "./data.db"
 	Tables = []string{WebSiteTable, MailTable, WebSiteURITable, WebSitePointTable,
-		WebSiteAlertTable, MonitorErrInfoTable, IncrementTable}
+		WebSiteAlertTable, MonitorErrInfoTable, IncrementTable, IPTable, MasterConfTable}
 	DB     = NewLocalDB(DBPath, Tables)
 	ISNULL = fmt.Errorf("ISNULL")
 )

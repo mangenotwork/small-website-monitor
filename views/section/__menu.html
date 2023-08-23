@@ -2,12 +2,16 @@
     <div class="position-sticky pt-3 sidebar-sticky">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" @click="test">
+                <a class="nav-link
+                {[ if eq .nav "home" ]} active {[ end ]}
+                " href="/home">
                     <span data-feather="home" class="align-text-bottom"></span>主页
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" @click="test()">
+                <a class="nav-link
+                {[ if eq .nav "monitor" ]} active {[ end ]}
+                " href="/monitor">
                     <span data-feather="users" class="align-text-bottom"></span>监测器
                 </a>
             </li>

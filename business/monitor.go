@@ -141,37 +141,38 @@ func (item *WebSiteItem) Run() {
 	if item.RateItem <= 0 {
 		// 计算频率复位
 		item.RateItem = item.Rate
-		log.Info("执行 " + item.HealthUri)
+		//log.Info("执行 " + item.HealthUri)
 		// 报警数据初始化
 		alert := &model.AlertBody{
 			Synopsis: "监测到" + item.Host + "站点出现问题，请快速前往检查并处理!",
 			Tr:       make([]*model.AlertTd, 0),
 		}
+		masterConf := model.GetMasterConf()
 		// 日志数据
 		mLog := &MonitorLog{
 			LogType:     "Info",
 			Time:        utils.NowDate(),
 			HostId:      item.ID,
 			Host:        item.Host,
-			ContrastUri: ContrastUri,
-			Ping:        Ping,
+			ContrastUri: masterConf.ContrastUri,
+			Ping:        masterConf.Ping,
 		}
 		// ping一下，检查当前网络环境
-		_, pingRse := item.Ping(mLog)
+		_, pingRse := item.Ping(masterConf, mLog)
 		if !pingRse {
 			// 网络环境异常不执行监测
 			return
 		}
 		// 请求对照组，对照组有问题不执行监测
-		if item.Contrast(mLog) {
+		if item.Contrast(masterConf, mLog) {
 			return
 		}
 		// 监测生命URI
-		isAlert1 := item.MonitorHealthUri(mLog, alert)
+		isAlert1 := item.MonitorHealthUri(masterConf, mLog, alert)
 		// 随机URI监测
-		isAlert2 := item.MonitorRandomUri(mLog, alert)
+		isAlert2 := item.MonitorRandomUri(masterConf, mLog, alert)
 		// 循环监测点监测
-		isAlert3 := item.MonitorPointUri(mLog, alert)
+		isAlert3 := item.MonitorPointUri(masterConf, mLog, alert)
 		// 发邮件
 		if isAlert1 || isAlert2 || isAlert3 {
 			now := time.Now().Unix()
@@ -208,11 +209,6 @@ func (item *WebSiteItem) AlertRuleMs(nowMs int64) bool {
 	return false
 }
 
-// ContrastUri TODO 对照组 和 ping 写入配置
-var ContrastUri = "www.baidu.com"
-var ContrastTime int64 = 1000
-var Ping = "101.226.4.6"
-
 func request(url string) (int, int64) {
 	ctx, err := gt.Get(url, gt.SetSleepMs(10, 100))
 	if err != nil {
@@ -223,8 +219,8 @@ func request(url string) (int, int64) {
 	return ctx.StateCode, ctx.Ms.Milliseconds()
 }
 
-func (item *WebSiteItem) Ping(mLog *MonitorLog) (int64, bool) {
-	ping, err := gt.Ping(Ping)
+func (item *WebSiteItem) Ping(masterConf *model.MasterConf, mLog *MonitorLog) (int64, bool) {
+	ping, err := gt.Ping(masterConf.Ping)
 	if err != nil {
 		mLog.LogType = LogTypeError
 		mLog.Msg = "网络不通请前往检查监测平台!" + err.Error()
@@ -244,8 +240,8 @@ func (item *WebSiteItem) Ping(mLog *MonitorLog) (int64, bool) {
 	return pingMs, true
 }
 
-func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
-	contrastCode, contrastMs := request(ContrastUri)
+func (item *WebSiteItem) Contrast(masterConf *model.MasterConf, mLog *MonitorLog) bool {
+	contrastCode, contrastMs := request(masterConf.ContrastUri)
 	mLog.ContrastUriCode = contrastCode
 	mLog.ContrastUriMs = contrastMs
 	contrastErr := false
@@ -254,9 +250,9 @@ func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
 		mLog.Msg += fmt.Sprintf("对照组请求失败code=%d!", contrastCode)
 		model.SetMonitorErrInfo(mLog.Msg)
 	}
-	if contrastMs >= ContrastTime {
+	if contrastMs >= masterConf.ContrastTime {
 		contrastErr = true
-		mLog.Msg += fmt.Sprintf("请求对照组网络超%dms 当前为%dms!", ContrastTime, contrastMs)
+		mLog.Msg += fmt.Sprintf("请求对照组网络超%dms 当前为%dms!", masterConf.ContrastTime, contrastMs)
 		model.SetMonitorErrInfo(mLog.Msg)
 	}
 	if contrastErr {
@@ -267,9 +263,9 @@ func (item *WebSiteItem) Contrast(mLog *MonitorLog) bool {
 	return contrastErr
 }
 
-func (item *WebSiteItem) MonitorHealthUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+func (item *WebSiteItem) MonitorHealthUri(masterConf *model.MasterConf, mLog *MonitorLog, alert *model.AlertBody) bool {
 	// =================================  监测生命URI
-	log.Info("=================================  监测生命URI... ")
+	//log.Info("=================================  监测生命URI... ")
 	times := 0
 R:
 	healthCode, healthMs := request(item.HealthUri)
@@ -329,7 +325,7 @@ R:
 			Code: healthCode,
 			Ms:   healthMs,
 			NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
-				mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+				mLog.PingMs, masterConf.ContrastUri, mLog.ContrastUriMs),
 			Msg: mLog.Msg,
 		})
 	}
@@ -340,9 +336,9 @@ R:
 	return healthAlert
 }
 
-func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+func (item *WebSiteItem) MonitorRandomUri(masterConf *model.MasterConf, mLog *MonitorLog, alert *model.AlertBody) bool {
 	// =================================  随机取一个URI监测
-	log.Info("=================================  随机取一个URI监测... ")
+	//log.Info("=================================  随机取一个URI监测... ")
 	uri := model.NewWebSiteUri(item.ID)
 	_, _ = uri.Get()
 	if len(uri.AllUri) > 0 {
@@ -395,7 +391,7 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 				Code: randomCode,
 				Ms:   randomMs,
 				NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
-					mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+					mLog.PingMs, masterConf.ContrastUri, mLog.ContrastUriMs),
 				Msg: mLog.Msg,
 			})
 		}
@@ -408,7 +404,7 @@ func (item *WebSiteItem) MonitorRandomUri(mLog *MonitorLog, alert *model.AlertBo
 	return false
 }
 
-func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBody) bool {
+func (item *WebSiteItem) MonitorPointUri(masterConf *model.MasterConf, mLog *MonitorLog, alert *model.AlertBody) bool {
 	// =================================  循环监测点监测
 	point := model.NewWebSitePoint(item.ID)
 	err := point.Get()
@@ -464,7 +460,7 @@ func (item *WebSiteItem) MonitorPointUri(mLog *MonitorLog, alert *model.AlertBod
 					Code: pointCode,
 					Ms:   pointMs,
 					NetworkEnv: fmt.Sprintf("ping:%dms; 对照组(%s):%dms",
-						mLog.PingMs, ContrastUri, mLog.ContrastUriMs),
+						mLog.PingMs, masterConf.ContrastUri, mLog.ContrastUriMs),
 					Msg: mLog.Msg,
 				})
 			}

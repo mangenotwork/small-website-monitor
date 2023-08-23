@@ -28,6 +28,15 @@ func HomePage(c *gin.Context) {
 	c.HTML(200, "home.html", gin.H{
 		"Title":     conf.Conf.Default.App.Name,
 		"timeStamp": global.TimeStamp,
+		"nav":       "home",
+	})
+}
+
+func MonitorPage(c *gin.Context) {
+	c.HTML(200, "monitor.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "monitor",
 	})
 }
 

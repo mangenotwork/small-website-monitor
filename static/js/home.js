@@ -16,16 +16,12 @@ const app = createApp({
             },
             msg: "",
             websiteList: {
-                api: function (){
-                    return "/api/website/list?pg="+this.page;
-                },
+                api: function (){ return "/api/website/list"; },
                 page: 1,
                 data: [],
             },
             deleteWebsite: {
-                api: function (){
-                    return "/api/website/delete/"+id;
-                },
+                api: function (){ return "/api/website/delete/" + this.id; },
                 id: "",
                 hostName: "",
             },
@@ -52,15 +48,9 @@ const app = createApp({
             point: {
                 hostId: "",
                 hostUri: "",
-                apiAdd: function (){
-                    return "/api/point/add/"+this.hostId;
-                },
-                apiList: function () {
-                    return "/api/point/list/"+this.hostId;
-                },
-                apiDel: function () {
-                    return "/api/point/del/"+this.hostId;
-                },
+                apiAdd: function (){ return "/api/point/add/"+this.hostId; },
+                apiList: function () { return "/api/point/list/"+this.hostId; },
+                apiDel: function () { return "/api/point/del/"+this.hostId; },
                 param: {
                     uri:"",
                 },
@@ -69,9 +59,7 @@ const app = createApp({
             },
             websiteInfo: {
                 hostId: "",
-                api: function() {
-                    return "/api/website/info/"+this.hostId;
-                },
+                api: function() { return "/api/website/info/"+this.hostId; },
                 data: {}
             },
             alertList: {
@@ -89,15 +77,9 @@ const app = createApp({
             isOk: "",
             monitorLog: {
                 hostId: "",
-                api: function (){
-                    return "/api/monitor/log/" + this.hostId;
-                },
-                logListApi: function () {
-                    return "/api/log/list/" + this.hostId;
-                },
-                logUpload: function () {
-                    return "/api/log/upload/" + this.hostId +"?day=" + this.log;
-                },
+                api: function (){ return "/api/monitor/log/" + this.hostId; },
+                logListApi: function () { return "/api/log/list/" + this.hostId; },
+                logUpload: function () { return "/api/log/upload/" + this.hostId + "?day=" + this.log; },
                 data: {},
                 logList: [],
                 log: "",
@@ -117,9 +99,7 @@ const app = createApp({
                 api: function () {
                   return "/api/website/chart/" + this.hostId + "?day=" + this.selectDay + "&uri=" + this.selectUriType;
                 },
-                dayApi: function () {
-                  return "/api/log/list/" + this.hostId;
-                },
+                dayApi: function () { return "/api/log/list/" + this.hostId; },
                 list: [],
                 host: "",
                 selectDay: "",
@@ -130,14 +110,10 @@ const app = createApp({
             },
             websiteAlert: {
                 hostId: "",
-                api: function () {
-                    return "/api/website/alert/" + this.hostId;
-                },
+                api: function () { return "/api/website/alert/" + this.hostId; },
                 list: [],
                 len: 0,
-                del: function (date) {
-                    return "/api/website/alert/del/" + this.hostId + "?date="+date;
-                }
+                del: function (date) { return "/api/website/alert/del/" + this.hostId + "?date="+date; }
             }
         }
     },

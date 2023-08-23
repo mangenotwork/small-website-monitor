@@ -46,12 +46,12 @@ const (
 // 写日志
 func (m *MonitorLog) Write() {
 	logPath, err := conf.YamlGetString("logPath")
-	log.Info("logPath = ", logPath)
+	//log.Info("logPath = ", logPath)
 	if err != nil {
 		logPath = "./log/"
 	}
 	fileName := logPath + m.HostId + "_" + utils.NowDateLayout(global.DayLayout) + ".log"
-	log.Info("fileName = ", fileName)
+	//log.Info("fileName = ", fileName)
 	var file *os.File
 	if !utils.Exists(fileName) {
 		_ = os.MkdirAll(logPath, 0666)

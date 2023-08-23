@@ -68,14 +68,12 @@ func (m *WebSite) Add() (string, error) {
 }
 
 // List 分页获取
-func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
+func (m *WebSite) List() ([]*WebSite, int, error) {
 	DB.Open()
 	defer func() {
 		_ = DB.Conn.Close()
 	}()
 	count := 0
-	start := (pg - 1) * size
-	end := pg * size
 	data := make([]*WebSite, 0)
 	err := DB.Conn.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(WebSiteTable))
@@ -83,19 +81,15 @@ func (m *WebSite) List(pg, size int) ([]*WebSite, int, error) {
 			return fmt.Errorf(WebSiteTable + "表不存在")
 		}
 		c := b.Cursor()
-		i := 0
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			i++
-			if i > start && i <= end {
-				value := &WebSite{}
-				e := json.Unmarshal(v, value)
-				if e != nil {
-					log.Error("数据解析错误")
-				}
-				data = append(data, value)
+			count++
+			value := &WebSite{}
+			e := json.Unmarshal(v, value)
+			if e != nil {
+				log.Error("数据解析错误")
 			}
+			data = append(data, value)
 		}
-		count = i
 		return nil
 	})
 	return data, count, err
