@@ -627,6 +627,22 @@ func MonitorSlaveInfo(c *ginHelper.GinCtx) {
 	return
 }
 
+func MonitorConfSave(c *ginHelper.GinCtx) {
+	conf := &model.MasterConf{}
+	err := c.GetPostArgs(conf)
+	if err != nil {
+		c.APIOutPutError(err, "参数或参数类型错误")
+		return
+	}
+	err = model.SaveMasterConf(conf)
+	if err != nil {
+		c.APIOutPutError(err, "保存失败")
+		return
+	}
+	c.APIOutPut("", "保存成功")
+	return
+}
+
 func Case1(c *ginHelper.GinCtx) {
 	ip := model.GetNativeIP()
 	c.APIOutPut(ip, "")

@@ -127,20 +127,7 @@
             {[ template "isok_modal.html" ]}
             {[ template "chart_modal.html" ]}
             {[ template "alert_modal.html" ]}
-            <div class="toast-container p-3 top-50 start-50 translate-middle">
-                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header">
-                        <img src="/static/bootstrap/img/stripe.svg" class="rounded me-2" >
-                        <strong class="me-auto">提示</strong>
-                        <small></small>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                    <div class="toast-body">
-                        {{msg}}
-                    </div>
-                </div>
-            </div>
-
+            {[ template "toast.html" ]}
         </main>
     </div>
 </div>
@@ -152,5 +139,6 @@
 <script src="/static/bootstrap/js/bootstrap.bundle.min.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="/static/js/home.js?v={[ .timeStamp ]}"></script>
+<script type="module" src="/static/js/public.js?v={[ .timeStamp ]}"></script>
+<script type="module" src="/static/js/home.js?v={[ .timeStamp ]}"></script>
 </html>

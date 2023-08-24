@@ -76,7 +76,7 @@ func API() {
 	api.GET("/monitor/log/:hostId", ginHelper.Handle(handler.MonitorLog))            // 查看日志
 	api.GET("/alert/count/:hostId", ginHelper.Handle(handler.AlertCount))            // 获取报警通知数量
 	api.GET("/slave/info", ginHelper.Handle(handler.MonitorSlaveInfo))               // 获取平台端系统信息
-
+	api.POST("/conf/save", ginHelper.Handle(handler.MonitorConfSave))                // 设置监测器
 	// 测试
 	api.GET("/test/case1", ginHelper.Handle(handler.Case1))
 	api.GET("/test/case2", ginHelper.Handle(handler.Case2))

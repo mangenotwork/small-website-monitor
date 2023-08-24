@@ -6,16 +6,69 @@
         <div class="row">
             {[ template "__menu.html" . ]}
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                监控器
+                <h5 class="card-title" style="margin-bottom: 12px;">检测器基础信息</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">版本: {{ base.info.Version }}</li>
+                    <li class="list-group-item">HTTP请求组件: {{ base.info.HttpSubassembly }}</li>
+                    <li class="list-group-item">IP: {{ base.info.IP }}</li>
+                    <li class="list-group-item">地址: {{ base.info.Address }}</li>
+                    <li class="list-group-item">系统信息: {{ base.info.OSVersion }}</li>
+                </ul>
+                <hr>
+                <h5 class="card-title" style="margin-bottom: 12px;">检测器基础设置</h5>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" placeholder="" v-model="base.conf.ContrastUri">
+                    <label >对照组，作用是对比站点响应时间，每次监控请求会先执行对照组请求，请设置一个稳定的URI</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" placeholder="" v-model="base.conf.ContrastTime">
+                    <label >对照组最大超时，超过这个时间为当前网络不好则不执行当前的监测跳过到下一轮</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" placeholder="" v-model="base.conf.Ping">
+                    <label >Ping地址，作用是代指当前网络环境，每次监测前会先执行ping，一般设置当地DNS IP</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" placeholder="" v-model="base.conf.LogSaveDay">
+                    <label >日志保留最近几天</label>
+                </div>
+                <button type="button" class="btn btn-outline-dark" @click="saveConf()">保存修改</button>
+                <hr>
+                <h5 class="card-title" style="margin-bottom: 12px;">邮件通知设置</h5>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" v-model="base.mail.Host" placeholder="smtp.qq.com">
+                    <label>邮件服务器(例子:smtp.qq.com)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" v-model="base.mail.Port" placeholder="25">
+                    <label>Port(例子:465/587/25)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" v-model="base.mail.From" placeholder="">
+                    <label>From(发送人)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" v-model="base.mail.AuthCode" placeholder="">
+                    <label>AuthCode(授权码)</label>
+                </div>
+                <div class="form-floating">
+                    <textarea class="form-control" v-model="base.mail.ToList" style="height: 98px;"></textarea>
+                    <label>通知收件人，多个分号";"隔开</label>
+                </div>
+                <br>
+                <button type="button" class="btn btn-outline-dark" @click="saveMail()">保存修改</button>
+                <button type="button" class="btn btn-outline-dark" style="margin-left: 12px;" @click="testSendMail()">测试发送</button>
+                <hr>
             </main>
         </div>
     </div>
-
+    {[ template "toast.html" ]}
 </div>
 </body>
 <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script>
 <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 <script src="/static/bootstrap/js/bootstrap.bundle.min.js?v=1"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="/static/js/monitor.js?v={[ .timeStamp ]}"></script>
+<script type="module" src="/static/js/public.js?v={[ .timeStamp ]}"></script>
+<script type="module" src="/static/js/monitor.js?v={[ .timeStamp ]}"></script>
 </html>

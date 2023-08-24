@@ -1,4 +1,5 @@
 const { createApp, ref } = Vue;
+import common from './public.js'
 const app = createApp({
     data() {
         return {
@@ -133,67 +134,17 @@ const app = createApp({
         window.clearInterval(t.timer);
     },
     methods: {
-        toastShow: function (msg) {
-            let t = this;
-            t.msg = msg;
-            const toastLiveExample = document.getElementById('liveToast')
-            const toast = new bootstrap.Toast(toastLiveExample)
-            toast.show()
-        },
-        get: function (url, func) {
-            $.ajax({
-                type: "get",
-                url: url,
-                data: "",
-                dataType: 'json',
-                success: function(data){
-                    func(data);
-                },
-                error: function(xhr,textStatus) {
-                    console.log(xhr, textStatus);
-                }
-            });
-        },
-        getNotAsync: function (url, func) {
-            $.ajax({
-                type: "get",
-                url: url,
-                data: "",
-                dataType: 'json',
-                async: false,
-                success: function(data){
-                    func(data);
-                },
-                error: function(xhr,textStatus) {
-                    console.log(xhr, textStatus);
-                }
-            });
-        },
-        post: function (url, param, func) {
-            $.ajax({
-                type: "post",
-                url: url,
-                data: JSON.stringify(param),
-                dataType: 'json',
-                success: function(data){
-                    func(data);
-                },
-                error: function(xhr,textStatus) {
-                    console.log(xhr, textStatus);
-                }
-            });
-        },
         addWebSiteMonitor: function () {
             let t = this;
             t.addWebSite.param.rate = Number(t.addWebSite.param.rate);
             t.addWebSite.param.alarmResTime = Number(t.addWebSite.param.alarmResTime);
             t.addWebSite.param.uriDepth = Number(t.addWebSite.param.uriDepth);
-            t.post(t.addWebSite.api, t.addWebSite.param, function (data){
+            common.AjaxPost(t.addWebSite.api, t.addWebSite.param, function (data){
                 if (data.code === 0) {
                     $("#addHostModal").modal('toggle');
                     t.getList();
                 }
-                t.toastShow(data.msg);
+                common.ToastShow(data.msg);
             });
         },
         test:function () {
@@ -201,13 +152,13 @@ const app = createApp({
         },
         getList: function () {
             let t = this;
-            t.get(t.websiteList.api(), function (data){
+            common.AjaxGet(t.websiteList.api(), function (data){
                 t.websiteList.data = data.data;
             });
         },
         getAlertList: function () {
             let t = this;
-            t.get(t.alertList.api, function (data) {
+            common.AjaxGet(t.alertList.api, function (data) {
                 t.alertList.list = data.data;
                 t.alertList.len = t.alertList.list.length;
             });
@@ -219,15 +170,15 @@ const app = createApp({
         },
         alertClearSubmit: function () {
             let t = this;
-            t.get(t.alertList.clear, function (data){
-                t.toastShow(data.msg);
+            common.AjaxGet(t.alertList.clear, function (data){
+                common.ToastShow(data.msg);
                 t.getAlertList();
                 $("#isOkModal").modal('toggle');
             });
         },
         getMonitorErrList: function () {
             let t = this;
-            t.get(t.monitorErrList.api, function (data){
+            common.AjaxGet(t.monitorErrList.api, function (data){
                 t.monitorErrList.list = data.data;
                 t.monitorErrList.len = t.monitorErrList.list.length;
             });
@@ -239,8 +190,8 @@ const app = createApp({
         },
         monitorErrClearSubmit: function () {
             let t = this;
-            t.get(t.monitorErrList.clear, function (data){
-                t.toastShow(data.msg);
+            common.AjaxGet(t.monitorErrList.clear, function (data){
+                common.ToastShow(data.msg);
                 t.getMonitorErrList();
                 $("#isOkModal").modal('toggle');
             });
@@ -252,26 +203,25 @@ const app = createApp({
         },
         getMail: function () {
             let t = this;
-            t.get(t.hasMail.api, function (data){
+            common.AjaxGet(t.hasMail.api, function (data){
                 t.hasMail.data = data.data;
             })
         },
         setMailConf: function () {
             let t = this;
-            if (Array.isArray(t.mailConf.param.toList)) {
-                t.mailConf.param.toList = t.mailConf.param.toList.join("");
-            }
-            t.post(t.mailConf.api, t.mailConf.param, function (data){
+            t.mailConf.param.toList = common.MailToListJoin(t.mailConf.param.toList);
+            t.mailConf.param.port = Number(t.mailConf.param.port)
+            common.AjaxPost(t.mailConf.api, t.mailConf.param, function (data){
                 if (data.code === 0) {
                     $("#mailSetModal").modal('toggle');
                     t.getMail();
                 }
-                t.toastShow(data.msg);
+                common.ToastShow(data.msg);
             });
         },
         getMailInfo: function () {
             let t = this;
-            t.get(t.mailInfo.api, function (data){
+            common.AjaxGet(t.mailInfo.api, function (data){
                 t.mailConf.param.host = data.data.Host;
                 t.mailConf.param.port = data.data.Port;
                 t.mailConf.param.from = data.data.From;
@@ -281,12 +231,10 @@ const app = createApp({
         },
         mailSendTest: function () {
             let t = this;
-            if (Array.isArray(t.mailConf.param.toList)) {
-                t.mailConf.param.toList = t.mailConf.param.toList.join("");
-            }
-            t.mailConf.param.port = Number(t.mailConf.param.port);
-            t.post(t.mailSend.api, t.mailConf.param, function (data){
-                t.toastShow(data.msg);
+            t.mailConf.param.toList = common.MailToListJoin(t.mailConf.param.toList);
+            t.mailConf.param.port = Number(t.mailConf.param.port)
+            common.AjaxPost(t.mailSend.api, t.mailConf.param, function (data){
+                common.ToastShow(data.msg);
             });
         },
         setUriPoint: function (item) {
@@ -298,7 +246,7 @@ const app = createApp({
         },
         getUriPoint: function () {
             let t = this;
-            t.get(t.point.apiList(), function (data){
+            common.AjaxGet(t.point.apiList(), function (data){
                 t.point.uriList = []
                 if (data.code === 0) {
                     t.point.uriList = data.data;
@@ -308,12 +256,12 @@ const app = createApp({
         addUriPoint: function () {
             let t = this;
             if (t.point.nowUri === "") {
-                t.toastShow("请输入URI");
+                common.ToastShow("请输入URI");
                 return
             }
             t.point.param.uri = t.point.hostUri + t.point.nowUri;
-            t.post(t.point.apiAdd(), t.point.param, function (data){
-                t.toastShow(data.msg);
+            common.AjaxPost(t.point.apiAdd(), t.point.param, function (data){
+                common.ToastShow(data.msg);
                 t.getUriPoint();
             });
         },
@@ -321,44 +269,44 @@ const app = createApp({
             let t = this;
             t.point.hostId = hostId;
             t.point.param.uri = uri;
-            t.post(t.point.apiAdd(), t.point.param, function (data){
-                t.toastShow(data.msg);
+            common.AjaxPost(t.point.apiAdd(), t.point.param, function (data){
+                common.ToastShow(data.msg);
                 t.getUriPoint();
             });
         },
         delUriPoint: function (uri) {
             let t = this;
             t.point.param.uri = uri;
-            t.post(t.point.apiDel(), t.point.param, function (data){
-                t.toastShow(data.msg);
+            common.AjaxPost(t.point.apiDel(), t.point.param, function (data){
+                common.ToastShow(data.msg);
                 t.getUriPoint();
             });
         },
         openWebsiteInfo: function (id) {
             let t = this;
             t.websiteInfo.hostId = id;
-            t.get(t.websiteInfo.api(), function (data){
+            common.AjaxGet(t.websiteInfo.api(), function (data){
                 if (data.code === 0) {
                     t.websiteInfo.data = data.data;
                     $("#websiteInfoModal").modal('show');
                 } else {
-                    t.toastShow(data.msg);
+                    common.ToastShow(data.msg);
                 }
             });
         },
         logShow: function (id) {
             let t = this;
             t.monitorLog.hostId = id;
-            t.getNotAsync(t.monitorLog.logListApi(), function (data){
+            common.AjaxGetNotAsync(t.monitorLog.logListApi(), function (data){
                 t.monitorLog.logList = data.data.DayList;
                 t.monitorLog.log = t.monitorLog.logList[0];
             })
-            t.get(t.monitorLog.api(), function (data){
+            common.AjaxGet(t.monitorLog.api(), function (data){
                 if (data.code === 0) {
                     t.monitorLog.data = data.data;
                     $("#logModal").modal('show');
                 } else {
-                    t.toastShow(data.msg);
+                    common.ToastShow(data.msg);
                 }
             });
         },
@@ -375,8 +323,8 @@ const app = createApp({
         },
         deleteWebsiteSubmit: function () {
             let t = this;
-            t.get(t.deleteWebsite.api(), function (data){
-                t.toastShow(data.msg);
+            common.AjaxGet(t.deleteWebsite.api(), function (data){
+                common.ToastShow(data.msg);
                 t.getMonitorErrList();
                 $("#isOkModal").modal('toggle');
                 t.getList();
@@ -398,8 +346,8 @@ const app = createApp({
             t.editWebsiteConf.param.rate = Number(t.editWebsiteConf.param.rate);
             t.editWebsiteConf.param.alarmResTime = Number(t.editWebsiteConf.param.alarmResTime);
             t.editWebsiteConf.param.uriDepth = Number(t.editWebsiteConf.param.uriDepth);
-            t.post(t.editWebsiteConf.api, t.editWebsiteConf.param, function (data){
-                t.toastShow(data.msg);
+            common.AjaxPost(t.editWebsiteConf.api, t.editWebsiteConf.param, function (data){
+                common.ToastShow(data.msg);
                 $("#setAlertModal").modal('toggle');
             })
         },
@@ -407,11 +355,11 @@ const app = createApp({
             let t = this;
             let clipboard = new ClipboardJS('.copy');
             clipboard.on('success', e => {
-                t.toastShow("复制成功!");
+                common.ToastShow("复制成功!");
                 e.clearSelection();
             });
             clipboard.on('error', e => {
-                t.toastShow("复制失败！请重试或者手动复制内容!");
+                common.ToastShow("复制失败！请重试或者手动复制内容!");
             });
         },
         openChart: function (item){
@@ -419,7 +367,7 @@ const app = createApp({
             t.chartData.hostId = item.ID;
             t.chartData.host = item.Host;
             t.chartData.selectUriType = t.chartData.uriType[0].value;
-            t.getNotAsync(t.chartData.dayApi(), function (data) {
+            common.AjaxGetNotAsync(t.chartData.dayApi(), function (data) {
                 t.chartData.dayList = data.data.DayList;
                 t.chartData.selectDay = t.chartData.dayList[0];
             });
@@ -438,10 +386,10 @@ const app = createApp({
         },
         DrawChart: function () {
             let t = this;
-            t.getNotAsync(t.chartData.api(), function (data) {
+            common.AjaxGetNotAsync(t.chartData.api(), function (data) {
                 t.chartData.list = data.data;
             });
-            option = {
+            var option = {
                 tooltip: {
                     trigger: 'axis',
                     position: function (pt) {
@@ -463,7 +411,8 @@ const app = createApp({
                 },
                 yAxis: {
                     type: 'value',
-                    boundaryGap: [0, '100%']
+                    boundaryGap: [0, '100%'],
+                    name:"(单位:ms)",
                 },
                 dataZoom: [
                     {
@@ -497,7 +446,7 @@ const app = createApp({
         openAlert: function (id) {
             let t = this;
             t.websiteAlert.hostId = id;
-            t.get(t.websiteAlert.api(), function (data){
+            common.AjaxGet(t.websiteAlert.api(), function (data){
                t.websiteAlert.list = data.data;
                t.websiteAlert.len = t.websiteAlert.list.length;
             });
@@ -505,8 +454,8 @@ const app = createApp({
         },
         delAlert: function (date) {
             let t = this;
-            t.get(t.websiteAlert.del(date), function (data) {
-                t.toastShow(data.msg);
+            common.AjaxGet(t.websiteAlert.del(date), function (data) {
+                common.ToastShow(data.msg);
                 if (data.code === 0) {
                     t.openAlert(data.data);
                 }

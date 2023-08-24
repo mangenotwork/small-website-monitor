@@ -32,3 +32,7 @@ func GetMasterConf() *MasterConf {
 	}
 	return masterConf
 }
+
+func SaveMasterConf(conf *MasterConf) error {
+	return DB.Set(MasterConfTable, MasterConfKey, conf)
+}

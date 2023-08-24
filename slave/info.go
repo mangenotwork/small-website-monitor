@@ -21,12 +21,12 @@ type SlaveInfo struct {
 }
 
 func GetSlaveInfo() *SlaveInfo {
-	ipInfo := model.GetNativeIP()
+	myIP := model.GetMyIP()
 	return &SlaveInfo{
 		Version:         global.Version,
 		HttpSubassembly: global.HttpSubassembly,
-		IP:              ipInfo.IP,
-		Address:         ipInfo.Address,
+		IP:              myIP.IP,
+		Address:         myIP.Address,
 		OSVersion:       GetOSInfo(),
 	}
 }
