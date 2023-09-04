@@ -2,16 +2,15 @@ module small-website-monitor
 
 go 1.19
 
-replace github.com/mangenotwork/common => /media/ManGe/fe3b15b2-5de5-42d6-98ce-ed93b8af992b1/mygo/src/github.com/mangenotwork/common
-
-replace github.com/mangenotwork/gathertool => /media/ManGe/fe3b15b2-5de5-42d6-98ce-ed93b8af992b1/mygo/src/github.com/mangenotwork/gathertool
+// replace github.com/mangenotwork/common => /media/ManGe/fe3b15b2-5de5-42d6-98ce-ed93b8af992b1/mygo/src/github.com/mangenotwork/common
+// replace github.com/mangenotwork/gathertool => /media/ManGe/fe3b15b2-5de5-42d6-98ce-ed93b8af992b1/mygo/src/github.com/mangenotwork/gathertool
 
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.9.1
-	github.com/mangenotwork/common v0.0.0-00010101000000-000000000000
-	github.com/mangenotwork/gathertool v0.4.4
+	github.com/mangenotwork/common v0.1.3
+	github.com/mangenotwork/gathertool v0.4.5
 )
 
 require (

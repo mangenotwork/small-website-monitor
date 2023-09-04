@@ -1,4 +1,4 @@
-const { createApp, ref, use } = Vue;
+const { createApp, ref } = Vue;
 import common from './public.js'
 const app = createApp({
     data() {

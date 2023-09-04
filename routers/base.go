@@ -44,8 +44,12 @@ func Page() {
 	pg.Use(AuthPG())
 	pg.GET("/home", handler.HomePage)
 	pg.GET("/monitor", handler.MonitorPage)
-	// TODO 工具
-	// TODO 使用说明
+	pg.GET("/tool", handler.ToolPage)
+	pg.GET("/mysql", handler.MysqlMonitorPage)
+	pg.GET("/redis", handler.RedisMonitorPage)
+	pg.GET("/sqlserver", handler.SqlServerMonitorPage)
+	pg.GET("/operation", handler.OperationLogPage)
+	pg.GET("/instructions", handler.InstructionsPage)
 }
 
 func API() {

@@ -40,6 +40,54 @@ func MonitorPage(c *gin.Context) {
 	})
 }
 
+func ToolPage(c *gin.Context) {
+	c.HTML(200, "tool_main.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "tool",
+	})
+}
+
+func MysqlMonitorPage(c *gin.Context) {
+	c.HTML(200, "mysql_monitor.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "mysql",
+	})
+}
+
+func RedisMonitorPage(c *gin.Context) {
+	c.HTML(200, "redis_monitor.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "redis",
+	})
+}
+
+func SqlServerMonitorPage(c *gin.Context) {
+	c.HTML(200, "sqlserver_monitor.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "sqlserver",
+	})
+}
+
+func OperationLogPage(c *gin.Context) {
+	c.HTML(200, "operation_log.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "operation",
+	})
+}
+
+func InstructionsPage(c *gin.Context) {
+	c.HTML(200, "instructions.html", gin.H{
+		"Title":     conf.Conf.Default.App.Name,
+		"timeStamp": global.TimeStamp,
+		"nav":       "instructions",
+	})
+}
+
 func NotFond(c *gin.Context) {
 	// 实现内部重定向
 	c.HTML(http.StatusOK, "notfond.html", gin.H{

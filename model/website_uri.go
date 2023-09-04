@@ -39,10 +39,8 @@ func (m *WebSiteUri) Collect(rootURI string, depth int) {
 	gt.ApplicationTerminalOut = false
 	hostScan := gt.NewHostScanUrl(rootURI, depth)
 	m.AllUri, _ = hostScan.Run()
-	//log.Info("m.AllUri = ", m.AllUri)
 	extLinks := gt.NewHostScanExtLinks(rootURI)
 	m.ExtLink, _ = extLinks.Run()
-	//log.Info("m.ExtLink = ", m.ExtLink)
 	// 死链接监测
 	var badNum = 0
 	badLinks := gt.NewHostScanBadLink(rootURI, depth)

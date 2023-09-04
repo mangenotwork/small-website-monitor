@@ -48,13 +48,9 @@ CS: Master+Slave
 
 
 ### 进度计划
-- 工具页面  
-- 使用说明页面
+- bug: timeout 超时要记录并报警
 - TDK检查 页面是html则检查
 - bug: 链接采集到错误的
-- Mysql监测页面
-- Redis监测页面
-- SqlServer监测页面
 - 站点ip属地, 站点图标, 站点主页 TDK
 - 操作日志
 - 审计，报表，下载日志 等功能
@@ -70,6 +66,9 @@ Content-Length 与请求包中的用法相同，用以标识当前响应包中�
 
 - 域名备案查询
 - 备案检查
+- Mysql监测功能
+- Redis监测功能
+- SqlServer监测功能
 
 ## 工具开发
 - 站点Uri检查(死链检查,tdk检查, 外链检查，)

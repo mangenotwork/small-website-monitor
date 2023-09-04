@@ -51,8 +51,6 @@ func Monitor() {
 		for {
 			select {
 			case <-timer.C:
-				// log.Info("到监测执行点...")
-				// 获取站点对象
 				WebSiteObj.Range(func(key any, value any) bool {
 					web := value.(*WebSiteItem)
 					web.Run() // 不要使用并发，影响当前网络环境
@@ -265,7 +263,7 @@ func (item *WebSiteItem) Contrast(masterConf *model.MasterConf, mLog *MonitorLog
 
 func (item *WebSiteItem) MonitorHealthUri(masterConf *model.MasterConf, mLog *MonitorLog, alert *model.AlertBody) bool {
 	// =================================  监测生命URI
-	//log.Info("=================================  监测生命URI... ")
+	log.Info("=================================  监测生命URI... ", item.HealthUri)
 	times := 0
 R:
 	healthCode, healthMs := request(item.HealthUri)
